@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Reserva - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Nueva Reserva</h4>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-4">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         th:style="'width: ' + (${paso} * 33.33) + '%'" 
+                         th:aria-valuenow="${paso * 33.33}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        Paso <span th:text="${paso}"></span> de 3
+                    </div>
+                </div>
+                
+                <!-- Paso 1: Seleccionar Fecha -->
+                <div th:if="${paso == 1}" class="step-content">
+                    <h5 class="card-title">Paso 1: Selecciona la Fecha</h5>
+                    <form th:action="@{/reservas/nueva/paso1}" th:object="${reservaDTO}" method="post" id="paso1Form">
+                        <div class="mb-3">
+                            <label for="fechaReserva" class="form-label">Fecha de Reserva</label>
+                            <input type="date" id="fechaReserva" th:field="*{fechaReserva}" class="form-control" required
+                                   th:min="${fechaMinima}">
+                            <div class="text-danger" th:if="${#fields.hasErrors('fechaReserva')}" th:errors="*{fechaReserva}"></div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Siguiente</button>
+                            <a th:href="@{/reservas}" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Paso 2: Seleccionar Hora -->
+                <div th:if="${paso == 2}" class="step-content">
+                    <h5 class="card-title">Paso 2: Selecciona la Hora</h5>
+                    <form th:action="@{/reservas/nueva/paso2}" th:object="${reservaDTO}" method="post" id="paso2Form">
+                        <input type="hidden" th:field="*{fechaReserva}">
+                        
+                        <div class="mb-3">
+                            <label for="horaReserva" class="form-label">Hora de Reserva</label>
+                            <select id="horaReserva" name="horaReserva" class="form-select" required>
+                                <option value="">Seleccione una hora...</option>
+                                <option th:each="hora : ${horas}" 
+                                        th:value="${hora.name()}" 
+                                        th:text="${hora.getHora()}"
+                                        th:selected="${hora == reservaDTO.horaReserva}">07:00:00</option>
+                            </select>
+                            <div class="text-danger" th:if="${#fields.hasErrors('horaReserva')}" th:errors="*{horaReserva}"></div>
+                            
+                            <!-- Mensaje de error global -->
+                            <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/reservas/nueva}" class="btn btn-outline-secondary">Anterior</a>
+                            <button type="submit" class="btn btn-success">Siguiente</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Paso 3: Seleccionar Cancha -->
+                <div th:if="${paso == 3}" class="step-content">
+                    <h5 class="card-title">Paso 3: Selecciona la Cancha</h5>
+                    
+                    <div th:if="${#lists.isEmpty(canchas)}" class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> No hay canchas disponibles para la fecha y hora seleccionadas.
+                        <div class="mt-3">
+                            <a th:href="@{/reservas/nueva}" class="btn btn-outline-secondary">Cambiar Fecha</a>
+                        </div>
+                    </div>
+                    
+                    <form th:if="${not #lists.isEmpty(canchas)}" th:action="@{/reservas/nueva/confirmar}" th:object="${reservaDTO}" method="post" id="paso3Form">
+                        <input type="hidden" th:field="*{fechaReserva}">
+                        <input type="hidden" th:field="*{horaReserva}">
+                        <input type="hidden" id="canchaId" th:field="*{canchaId}">
+                        
+                        <div class="alert alert-info mb-4">
+                            <strong>Resumen:</strong>
+                            <ul class="mb-0">
+                                <li>Fecha: <span th:text="${#temporals.format(reservaDTO.fechaReserva, 'dd/MM/yyyy')}"></span></li>
+                                <li>Hora: <span th:text="${reservaDTO.horaReserva}"></span></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="mb-3">Selecciona una cancha:</h6>
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                                <div th:each="cancha : ${canchas}" class="col">
+                                    <div class="card h-100 cancha-card" th:data-cancha-id="${cancha.id}">
+                                        <div class="card-header" th:classappend="${cancha.tipo.name() == 'FUTBOL_11' ? 'bg-success' : (cancha.tipo.name() == 'FUTBOL_8' ? 'bg-primary' : 'bg-warning')}">
+                                            <h5 class="card-title text-white mb-0" th:text="${cancha.codigo}"></h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text">
+                                                <span class="badge" th:classappend="${cancha.tipo.name() == 'FUTBOL_11' ? 'bg-success' : (cancha.tipo.name() == 'FUTBOL_8' ? 'bg-primary' : 'bg-warning')}" th:text="${cancha.tipo}"></span>
+                                            </p>
+                                            <div class="d-grid">
+                                                <button type="button" class="btn btn-outline-dark btn-select-cancha"
+                                                        th:data-cancha-id="${cancha.id}" 
+                                                        th:data-cancha-codigo="${cancha.codigo}" 
+                                                        th:data-cancha-tipo="${cancha.tipo}">
+                                                    Seleccionar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a th:href="@{/reservas/nueva}" class="btn btn-outline-secondary">Anterior</a>
+                            <button type="submit" class="btn btn-success" id="btnConfirmarReserva" disabled>Confirmar Reserva</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        $(document).ready(function() {
+            // Debug - Log para ver si el script se está cargando
+            console.log("Script de reservas cargado");
+            
+            // Añadir un botón de debug solo visible para administradores
+            if ($('body').hasClass('role-admin')) {
+                $('.card-header').append('<button id="debugBtn" class="btn btn-sm btn-warning float-end">Debug</button>');
+                
+                $('#debugBtn').click(function() {
+                    alert('Estado de formulario actual:\n' + 
+                          'Paso: ' + $('#paso').val() + '\n' +
+                          'Fecha: ' + $('#fechaReserva').val() + '\n' +
+                          'Hora: ' + $('#horaReserva').val() + '\n' +
+                          'CanchaId: ' + $('#canchaId').val());
+                });
+            }
+            
+            // Manejo del formulario Paso 1
+            $("#paso1Form").submit(function(event) {
+                console.log("Formulario paso 1 enviado");
+                console.log("Fecha seleccionada:", $("#fechaReserva").val());
+                
+                // Validar que la fecha esté seleccionada
+                if (!$("#fechaReserva").val()) {
+                    alert("Por favor, selecciona una fecha");
+                    event.preventDefault();
+                    return false;
+                }
+                
+                // Si todo está bien, permitimos que el formulario se envíe normalmente
+            });
+            
+            // Manejo del formulario Paso 2
+            $("#paso2Form").submit(function(event) {
+                console.log("Formulario paso 2 enviado");
+                console.log("Hora seleccionada:", $("#horaReserva").val());
+                
+                // Validar que la hora esté seleccionada
+                if (!$("#horaReserva").val()) {
+                    alert("Por favor, selecciona una hora");
+                    event.preventDefault();
+                    return false;
+                }
+                
+                // Si todo está bien, permitimos que el formulario se envíe normalmente
+            });
+            
+            // Manejo del formulario Paso 3
+            $("#paso3Form").submit(function(event) {
+                console.log("Formulario paso 3 enviado");
+                console.log("Cancha seleccionada:", $("#canchaId").val());
+                
+                // Validar que la cancha esté seleccionada
+                if (!$("#canchaId").val()) {
+                    alert("Por favor, selecciona una cancha");
+                    event.preventDefault();
+                    return false;
+                }
+                
+                // Si todo está bien, permitimos que el formulario se envíe normalmente
+            });
+            
+            // Manejo de la selección de canchas en la galería
+            $(".btn-select-cancha").click(function() {
+                // Quitar selección previa
+                $(".cancha-card").removeClass("border-primary border-3");
+                $(".btn-select-cancha").removeClass("btn-primary").addClass("btn-outline-dark");
+                
+                // Marcar la cancha seleccionada
+                const canchaId = $(this).data("cancha-id");
+                $(this).removeClass("btn-outline-dark").addClass("btn-primary");
+                $(this).closest(".cancha-card").addClass("border-primary border-3");
+                
+                // Actualizar el campo oculto
+                $("#canchaId").val(canchaId);
+                
+                // Habilitar el botón de confirmar
+                $("#btnConfirmarReserva").prop("disabled", false);
+                
+                console.log("Cancha seleccionada:", canchaId);
+            });
+        });
+    </script>
+</body>
+</html>

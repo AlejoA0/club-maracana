@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-success">Gestión de Usuarios</h2>
+            <a th:href="@{/admin/usuarios/nuevo}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Nuevo Usuario
+            </a>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div class="card shadow">
+            <div class="card-body">
+                <form th:action="@{/admin/usuarios}" method="get" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="filtro" class="form-control" placeholder="Buscar por nombre, documento o email" 
+                               th:value="${filtro}">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Documento</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="usuario : ${usuarios}">
+                                <td th:text="${usuario.numeroDocumento}"></td>
+                                <td th:text="${usuario.nombreCompleto}"></td>
+                                <td th:text="${usuario.email}"></td>
+                                <td>
+                                    <span th:each="rol, iterStat : ${usuario.roles}" class="badge bg-success me-1" 
+                                          th:text="${rol.nombre.name().replace('ROLE_', '')}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${usuario.activo}">Activo</span>
+                                    <span class="badge bg-danger" th:unless="${usuario.activo}">Inactivo</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.numeroDocumento})}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#eliminarUsuarioModal"
+                                                th:attr="data-id=${usuario.numeroDocumento}, data-nombre=${usuario.nombreCompleto}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Paginación -->
+                <nav th:if="${usuarios.totalPages > 1}" aria-label="Paginación">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${usuarios.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/usuarios(pagina=${usuarios.number - 1}, tamano=10, filtro=${filtro})}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, usuarios.totalPages - 1)}"
+                            th:classappend="${i == usuarios.number ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/admin/usuarios(pagina=${i}, tamano=10, filtro=${filtro})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${usuarios.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/usuarios(pagina=${usuarios.number + 1}, tamano=10, filtro=${filtro})}" aria-label="Siguiente">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Modal Eliminar Usuario -->
+    <div class="modal fade" id="eliminarUsuarioModal" tabindex="-1" aria-labelledby="eliminarUsuarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eliminarUsuarioModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar al usuario <span id="nombreUsuario"></span>?</p>
+                    <p>Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="formEliminarUsuario" method="post">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const eliminarUsuarioModal = document.getElementById('eliminarUsuarioModal');
+            if (eliminarUsuarioModal) {
+                eliminarUsuarioModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const id = button.getAttribute('data-id');
+                    const nombre = button.getAttribute('data-nombre');
+                    
+                    document.getElementById('nombreUsuario').textContent = nombre;
+                    document.getElementById('formEliminarUsuario').action = '/admin/usuarios/eliminar/' + id;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <h2 class="text-success mb-4">Reportes</h2>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-pdf fa-4x text-danger mb-3"></i>
+                        <h3 class="card-title">Reporte PDF</h3>
+                        <p class="card-text">Genera un reporte PDF con todas las reservas y estadísticas.</p>
+                        <a th:href="@{/admin/reportes/reservas/pdf}" class="btn btn-outline-danger" target="_blank">
+                            <i class="fas fa-download"></i> Descargar PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-excel fa-4x text-success mb-3"></i>
+                        <h3 class="card-title">Reporte Excel</h3>
+                        <p class="card-text">Genera un reporte Excel con todas las reservas y estadísticas.</p>
+                        <a th:href="@{/admin/reportes/reservas/excel}" class="btn btn-outline-success" target="_blank">
+                            <i class="fas fa-download"></i> Descargar Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-pie fa-4x text-primary mb-3"></i>
+                        <h3 class="card-title">Estadísticas</h3>
+                        <p class="card-text">Visualiza gráficos de reservas por hora y tipo de cancha.</p>
+                        <p class="text-muted">Próximamente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

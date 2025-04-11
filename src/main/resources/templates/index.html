@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <style>
+        :root {
+            --primary-color: #2D5A27;
+            --secondary-color: #FFE77A;
+            --accent-color: #3A7CA5;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 0;
+            overflow-x: hidden;
+            background-color: #f8f9fa;
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1508098682722-e99c643e7f3c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 120px 0;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #1e4820;
+            border-color: #1e4820;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e6cf6e;
+            border-color: #e6cf6e;
+            color: #333;
+        }
+        
+        .testimonial-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .navbar .nav-link {
+            color: white !important;
+            padding: 10px 15px;
+            font-weight: 500;
+        }
+        
+        .navbar .nav-link:hover {
+            color: var(--secondary-color) !important;
+        }
+        
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-futbol"></i> Club Maracaná
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="nav-link" th:href="@{/login}">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="nav-link" th:href="@{/registro}">
+                            <i class="fas fa-user-plus"></i> Registro
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/reservas}">
+                            <i class="fas fa-calendar-alt"></i> Mis Reservas
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('DIRECTOR_TECNICO')">
+                        <a class="nav-link" th:href="@{/equipos}">
+                            <i class="fas fa-users"></i> Mi Equipo
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/admin}">
+                            <i class="fas fa-cog"></i> Administración
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/logout}">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="display-3 fw-bold mb-4">Club Social y Deportivo Maracaná</h1>
+                    <p class="lead fs-4 mb-4">El mejor complejo deportivo para jugadores y equipos de fútbol en Bogotá</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a th:href="@{/login}" class="btn btn-primary btn-lg px-4 py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión
+                        </a>
+                        <a th:href="@{/registro}" class="btn btn-secondary btn-lg px-4 py-2">
+                            <i class="fas fa-user-plus me-2"></i> Registrarse
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold text-success">¿Por qué elegirnos?</h2>
+                <p class="lead">Ofrecemos las mejores instalaciones para la práctica del fútbol</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card">
+                        <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" class="card-img-top" alt="Canchas de primer nivel">
+                        <div class="card-body text-center">
+                            <i class="fas fa-futbol feature-icon"></i>
+                            <h3 class="card-title h4 mb-3">Canchas de Primer Nivel</h3>
+                            <p class="card-text">Contamos con canchas de fútbol 11, fútbol 8 e infantil, todas con el mejor césped y mantenimiento.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card feature-card">
+                        <img src="https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" class="card-img-top" alt="Reservas fáciles">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar-alt feature-icon"></i>
+                            <h3 class="card-title h4 mb-3">Reservas Fáciles</h3>
+                            <p class="card-text">Sistema de reservas en línea fácil y rápido para que disfrutes de nuestras instalaciones.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card feature-card">
+                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1336&q=80" class="card-img-top" alt="Equipos y torneos">
+                        <div class="card-body text-center">
+                            <i class="fas fa-trophy feature-icon"></i>
+                            <h3 class="card-title h4 mb-3">Equipos y Torneos</h3>
+                            <p class="card-text">Forma parte de nuestros equipos o inscribe el tuyo propio para participar en torneos durante todo el año.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="bg-success text-white py-5">
+        <div class="container text-center">
+            <h2 class="display-5 fw-bold mb-4">¿Listo para jugar?</h2>
+            <p class="lead mb-4">Únete a nuestra comunidad y disfruta de las mejores instalaciones deportivas</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a th:href="@{/login}" class="btn btn-light btn-lg px-4">Iniciar Sesión</a>
+                <a th:href="@{/registro}" class="btn btn-outline-light btn-lg px-4">Registrarse</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h4 class="mb-4">Club Maracaná</h4>
+                    <p>El mejor complejo deportivo para la práctica del fútbol en todas sus categorías.</p>
+                </div>
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h4 class="mb-4">Enlaces Rápidos</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Inicio</a></li>
+                        <li class="mb-2"><a th:href="@{/login}" class="text-white text-decoration-none">Iniciar Sesión</a></li>
+                        <li class="mb-2"><a th:href="@{/registro}" class="text-white text-decoration-none">Registro</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h4 class="mb-4">Contacto</h4>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Bogotá, Colombia</p>
+                    <p><i class="fas fa-phone me-2"></i> +57 123 456 7890</p>
+                    <p><i class="fas fa-envelope me-2"></i> contacto@clubmaracana.com</p>
+                </div>
+            </div>
+            <hr class="my-4 bg-light opacity-25">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2023 Club Social y Deportivo Maracaná. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

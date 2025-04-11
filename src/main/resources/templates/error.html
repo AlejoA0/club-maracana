@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h3 class="mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            Ha ocurrido un error
+                        </h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mt-4 mb-5">
+                            <i class="fas fa-bug fa-5x text-danger"></i>
+                        </div>
+                        
+                        <h3 th:text="${status} ? 'Error ' + ${status} : 'Error'"></h3>
+                        <p class="lead" th:text="${error} ?: 'Ha ocurrido un error inesperado.'"></p>
+                        <p th:if="${message}" th:text="${message}"></p>
+                        
+                        <p class="text-muted small" th:if="${timestamp}" th:text="'Ocurrido el: ' + ${timestamp}"></p>
+                        
+                        <div class="mt-4">
+                            <a href="/" class="btn btn-outline-primary">
+                                <i class="fas fa-home"></i> Volver al inicio
+                            </a>
+                            <button class="btn btn-outline-secondary" onclick="window.history.back()">
+                                <i class="fas fa-arrow-left"></i> Volver atrás
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html> 

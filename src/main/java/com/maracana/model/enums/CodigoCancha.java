@@ -1,0 +1,31 @@
+package com.maracana.model.enums;
+
+public enum CodigoCancha {
+    CANCHA_1,
+    CANCHA_10,
+    CANCHA_11,
+    CANCHA_12,
+    CANCHA_13,
+    CANCHA_14,
+    CANCHA_16,
+    CANCHA_17,
+    CANCHA_18,
+    CANCHA_2A,
+    CANCHA_2B,
+    CANCHA_3,
+    CANCHA_4,
+    CANCHA_5,
+    CANCHA_6,
+    CANCHA_7,
+    CANCHA_8,
+    CANCHA_9,
+    CANCHA_BABY_1,
+    CANCHA_BABY_2,
+    FUTBOL_8_1,
+    FUTBOL_8_2,
+    FUTBOL_8_3,
+    FUTBOL_8_4,
+    TRANSICION_1,
+    TRANSICION_2,
+    TRANSICION_3
+}

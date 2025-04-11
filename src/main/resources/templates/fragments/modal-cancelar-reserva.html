@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="modal-cancelar-reserva" class="modal fade" id="cancelarReservaModal" tabindex="-1" aria-labelledby="cancelarReservaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelarReservaModalLabel">Confirmar Cancelación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas cancelar esta reserva?</p>
+                    <p>Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <form id="formCancelarReserva" method="post">
+                        <button type="submit" class="btn btn-danger">Cancelar Reserva</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:fragment="script-cancelar-reserva">
+        function prepararCancelacion(reservaId, esAdmin) {
+            const form = document.getElementById('formCancelarReserva');
+            const ruta = esAdmin ? '/admin/reservas/cancelar/' : '/reservas/';
+            form.action = ruta + reservaId + '/cancelar';
+        }
+    </script>
+</body>
+</html>

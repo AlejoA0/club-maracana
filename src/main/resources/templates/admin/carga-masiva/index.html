@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carga Masiva - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <h2 class="text-success mb-4">Carga Masiva de Datos</h2>
+        
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Carga de Usuarios</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Carga masiva de usuarios mediante archivo CSV.</p>
+                        <p><strong>Formato:</strong> numero_documento,tipo_documento,nombres,apellidos,email,password,fecha_nacimiento,eps,telefono,roles</p>
+                        <p><strong>Ejemplo:</strong> 123,CEDULA_CIUDADANIA,Luis,Gómez,luis@club.com,pass123,1990-05-15,Sanitas,3001234567,ROLE_JUGADOR</p>
+                        
+                        <form th:action="@{/admin/carga-masiva/usuarios}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="archivoUsuarios" class="form-label">Seleccionar archivo CSV</label>
+                                <input type="file" id="archivoUsuarios" name="archivo" class="form-control" accept=".csv" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-upload"></i> Cargar Usuarios
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="mt-3">
+                            <a th:href="@{/admin/carga-masiva/plantilla-usuarios}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-download"></i> Descargar Plantilla
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Carga de Canchas</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Carga masiva de canchas mediante archivo CSV.</p>
+                        <p><strong>Formato:</strong> id,codigo,tipo</p>
+                        <p><strong>Ejemplo:</strong> CAN_001,CANCHA_1,FUTBOL_11</p>
+                        
+                        <form th:action="@{/admin/carga-masiva/canchas}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="archivoCanchas" class="form-label">Seleccionar archivo CSV</label>
+                                <input type="file" id="archivoCanchas" name="archivo" class="form-control" accept=".csv" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-upload"></i> Cargar Canchas
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="mt-3">
+                            <a th:href="@{/admin/carga-masiva/plantilla-canchas}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-download"></i> Descargar Plantilla
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

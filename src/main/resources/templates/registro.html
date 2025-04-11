@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Registro de Usuario</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/registro}" th:object="${usuario}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tipoDocumento" class="form-label">Tipo de Documento</label>
+                                    <select id="tipoDocumento" th:field="*{tipoDocumento}" class="form-select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option th:each="tipo : ${tiposDocumento}" th:value="${tipo}" th:text="${tipo}"></option>
+                                    </select>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="numeroDocumento" class="form-label">Número de Documento</label>
+                                    <input type="text" id="numeroDocumento" th:field="*{numeroDocumento}" class="form-control" required>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('numeroDocumento')}" th:errors="*{numeroDocumento}"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombres" class="form-label">Nombres</label>
+                                    <input type="text" id="nombres" th:field="*{nombres}" class="form-control" required>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellidos" class="form-label">Apellidos</label>
+                                    <input type="text" id="apellidos" th:field="*{apellidos}" class="form-control" required>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" th:field="*{email}" class="form-control" required>
+                                <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" id="password" th:field="*{password}" class="form-control" required
+                                       minlength="6" oninput="validarPassword()">
+                                <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                                <div id="passwordError" class="text-danger" style="display: none;">
+                                    La contraseña debe tener al menos 6 caracteres.
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+                                    <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}" class="form-control">
+                                    <div class="text-danger" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="eps" class="form-label">EPS</label>
+                                    <input type="text" id="eps" th:field="*{eps}" class="form-control">
+                                    <div class="text-danger" th:if="${#fields.hasErrors('eps')}" th:errors="*{eps}"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input type="text" id="telefono" th:field="*{telefono}" class="form-control">
+                                <div class="text-danger" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success" id="submitBtn">Registrarse</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p class="mb-0">¿Ya tienes una cuenta? <a th:href="@{/login}" class="text-success">Iniciar Sesión</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script>
+        function validarPassword() {
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('passwordError');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (password.length < 6) {
+                errorElement.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                errorElement.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
