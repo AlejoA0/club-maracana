@@ -19,19 +19,21 @@
                         <h4 class="mb-0">Registro de Usuario</h4>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/registro}" th:object="${usuario}" method="post">
+                        <form th:action="@{/registro}" th:object="${usuario}" method="post" id="registroForm" onsubmit="return validarFormulario()">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="tipoDocumento" class="form-label">Tipo de Documento</label>
-                                    <select id="tipoDocumento" th:field="*{tipoDocumento}" class="form-select" required>
+                                    <select id="tipoDocumento" th:field="*{tipoDocumento}" class="form-select">
                                         <option value="">Seleccione...</option>
                                         <option th:each="tipo : ${tiposDocumento}" th:value="${tipo}" th:text="${tipo}"></option>
                                     </select>
+                                    <div class="text-danger" id="tipoDocumentoError" style="display: none;">El tipo de documento es obligatorio</div>
                                     <div class="text-danger" th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}"></div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="numeroDocumento" class="form-label">Número de Documento</label>
-                                    <input type="text" id="numeroDocumento" th:field="*{numeroDocumento}" class="form-control" required>
+                                    <input type="text" id="numeroDocumento" th:field="*{numeroDocumento}" class="form-control">
+                                    <div class="text-danger" id="numeroDocumentoError" style="display: none;">El número de documento es obligatorio</div>
                                     <div class="text-danger" th:if="${#fields.hasErrors('numeroDocumento')}" th:errors="*{numeroDocumento}"></div>
                                 </div>
                             </div>
@@ -39,30 +41,32 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="nombres" class="form-label">Nombres</label>
-                                    <input type="text" id="nombres" th:field="*{nombres}" class="form-control" required>
+                                    <input type="text" id="nombres" th:field="*{nombres}" class="form-control">
+                                    <div class="text-danger" id="nombresError" style="display: none;">Los nombres son obligatorios</div>
                                     <div class="text-danger" th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="apellidos" class="form-label">Apellidos</label>
-                                    <input type="text" id="apellidos" th:field="*{apellidos}" class="form-control" required>
+                                    <input type="text" id="apellidos" th:field="*{apellidos}" class="form-control">
+                                    <div class="text-danger" id="apellidosError" style="display: none;">Los apellidos son obligatorios</div>
                                     <div class="text-danger" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
                                 </div>
                             </div>
                             
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" id="email" th:field="*{email}" class="form-control" required>
+                                <input type="email" id="email" th:field="*{email}" class="form-control">
+                                <div class="text-danger" id="emailError" style="display: none;">Ingrese un email válido</div>
                                 <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                             </div>
                             
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" id="password" th:field="*{password}" class="form-control" required
-                                       minlength="6" oninput="validarPassword()">
-                                <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-                                <div id="passwordError" class="text-danger" style="display: none;">
+                                <input type="password" id="password" th:field="*{password}" class="form-control" oninput="validarPassword()">
+                                <div class="text-danger" id="passwordError" style="display: none;">
                                     La contraseña debe tener al menos 6 caracteres.
                                 </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                             </div>
                             
                             <div class="row">
@@ -103,15 +107,83 @@
         function validarPassword() {
             const password = document.getElementById('password').value;
             const errorElement = document.getElementById('passwordError');
-            const submitBtn = document.getElementById('submitBtn');
             
-            if (password.length < 6) {
+            if (password.length > 0 && password.length < 6) {
                 errorElement.style.display = 'block';
-                submitBtn.disabled = true;
             } else {
                 errorElement.style.display = 'none';
-                submitBtn.disabled = false;
             }
+        }
+        
+        function validarEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function validarFormulario() {
+            let esValido = true;
+            
+            // Validar tipo documento
+            const tipoDocumento = document.getElementById('tipoDocumento').value;
+            const tipoDocumentoError = document.getElementById('tipoDocumentoError');
+            if (!tipoDocumento) {
+                tipoDocumentoError.style.display = 'block';
+                esValido = false;
+            } else {
+                tipoDocumentoError.style.display = 'none';
+            }
+            
+            // Validar número documento
+            const numeroDocumento = document.getElementById('numeroDocumento').value;
+            const numeroDocumentoError = document.getElementById('numeroDocumentoError');
+            if (!numeroDocumento) {
+                numeroDocumentoError.style.display = 'block';
+                esValido = false;
+            } else {
+                numeroDocumentoError.style.display = 'none';
+            }
+            
+            // Validar nombres
+            const nombres = document.getElementById('nombres').value;
+            const nombresError = document.getElementById('nombresError');
+            if (!nombres) {
+                nombresError.style.display = 'block';
+                esValido = false;
+            } else {
+                nombresError.style.display = 'none';
+            }
+            
+            // Validar apellidos
+            const apellidos = document.getElementById('apellidos').value;
+            const apellidosError = document.getElementById('apellidosError');
+            if (!apellidos) {
+                apellidosError.style.display = 'block';
+                esValido = false;
+            } else {
+                apellidosError.style.display = 'none';
+            }
+            
+            // Validar email
+            const email = document.getElementById('email').value;
+            const emailError = document.getElementById('emailError');
+            if (!email || !validarEmail(email)) {
+                emailError.style.display = 'block';
+                esValido = false;
+            } else {
+                emailError.style.display = 'none';
+            }
+            
+            // Validar password
+            const password = document.getElementById('password').value;
+            const passwordError = document.getElementById('passwordError');
+            if (!password || password.length < 6) {
+                passwordError.style.display = 'block';
+                esValido = false;
+            } else {
+                passwordError.style.display = 'none';
+            }
+            
+            return esValido;
         }
     </script>
 </body>

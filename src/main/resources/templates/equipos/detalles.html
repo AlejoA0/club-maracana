@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${equipo.nombre} + ' - Club Social y Deportivo Maracaná'"></title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .equipo-header {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        
+        .equipo-logo {
+            max-height: 150px;
+            max-width: 150px;
+            object-fit: contain;
+        }
+        
+        .categoria-badge {
+            font-size: 1rem;
+        }
+        
+        .jugador-card {
+            transition: transform 0.2s ease;
+        }
+        
+        .jugador-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <!-- Botón de volver -->
+        <a th:href="@{/equipos}" class="btn btn-outline-secondary mb-4">
+            <i class="fas fa-arrow-left"></i> Volver a Equipos
+        </a>
+        
+        <div th:if="${mensaje}" th:class="'alert alert-' + ${tipoMensaje}" role="alert">
+            <i th:class="'fas ' + (${tipoMensaje == 'success'} ? 'fa-check-circle' : 'fa-exclamation-circle')"></i>
+            <span th:text="${mensaje}"></span>
+        </div>
+        
+        <!-- Información del equipo -->
+        <div class="equipo-header">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <img th:if="${equipo.logo != null}" 
+                         th:src="@{'/equipos/' + ${equipo.id} + '/logo'}" 
+                         class="equipo-logo mb-3" 
+                         th:alt="${equipo.nombre}">
+                    <img th:unless="${equipo.logo != null}" 
+                         th:src="@{/images/default-team-logo.png}" 
+                         class="equipo-logo mb-3" 
+                         alt="Logo por defecto">
+                </div>
+                <div class="col-md-9">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h1 th:text="${equipo.nombre}" class="mb-0"></h1>
+                        <span th:class="'badge categoria-badge bg-' + (${equipo.categoria.name() == 'FUTBOL_11' ? 'primary' : (${equipo.categoria.name() == 'FUTBOL_8' ? 'success' : 'warning')})">
+                            <i class="fas fa-futbol"></i> 
+                            <span th:text="${equipo.categoria.name().replace('_', ' ')}"></span>
+                        </span>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong><i class="fas fa-user-tie"></i> Director Técnico:</strong></p>
+                            <p th:text="${equipo.directorTecnico.nombres + ' ' + equipo.directorTecnico.apellidos}"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong><i class="fas fa-users"></i> Jugadores:</strong></p>
+                            <p th:text="${equipo.jugadores.size()}"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Acciones de equipo -->
+                    <div class="d-flex" sec:authorize="isAuthenticated()">
+                        <!-- Solicitar unirse (solo jugadores que no sean directores técnicos y no estén en este equipo) -->
+                        <form th:if="${!esMiembro && !solicitudPendiente && !esDirectorTecnico}" 
+                              th:action="@{/equipos/{id}/solicitar-union(id=${equipo.id})}" 
+                              method="post" 
+                              class="me-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-user-plus"></i> Solicitar Unirse
+                            </button>
+                        </form>
+                        
+                        <!-- Mensaje si ya tiene solicitud pendiente -->
+                        <button th:if="${solicitudPendiente}" 
+                                class="btn btn-warning disabled me-2" 
+                                disabled>
+                            <i class="fas fa-hourglass-half"></i> Solicitud Pendiente
+                        </button>
+                        
+                        <!-- Mensaje si ya es miembro -->
+                        <button th:if="${esMiembro}" 
+                                class="btn btn-info disabled me-2" 
+                                disabled>
+                            <i class="fas fa-check-circle"></i> Ya eres miembro
+                        </button>
+                        
+                        <!-- Acciones para el director técnico -->
+                        <div th:if="${esDirector}" class="btn-group">
+                            <a th:href="@{/equipos/{id}/editar(id=${equipo.id})}" class="btn btn-primary me-2">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a th:href="@{/equipos/{id}/solicitudes(id=${equipo.id})}" class="btn btn-info me-2">
+                                <i class="fas fa-clipboard-list"></i> 
+                                Solicitudes
+                                <span th:if="${solicitudesPendientes > 0}" 
+                                      class="badge bg-danger ms-1" 
+                                      th:text="${solicitudesPendientes}"></span>
+                            </a>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarEquipoModal">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Listado de jugadores -->
+        <h2 class="mb-4">Jugadores del Equipo</h2>
+        
+        <div th:if="${equipo.jugadores.empty}" class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Este equipo aún no tiene jugadores.
+        </div>
+        
+        <div th:unless="${equipo.jugadores.empty}" class="row row-cols-1 row-cols-md-4 g-4">
+            <div class="col" th:each="jugador : ${equipo.jugadores}">
+                <div class="card h-100 jugador-card">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-user-circle fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title" th:text="${jugador.usuario.nombres + ' ' + jugador.usuario.apellidos}"></h5>
+                        <p class="card-text">
+                            <small class="text-muted" th:text="${jugador.usuario.email}"></small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Modal para confirmar eliminación del equipo -->
+    <div class="modal fade" id="eliminarEquipoModal" tabindex="-1" aria-labelledby="eliminarEquipoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="eliminarEquipoModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar el equipo <strong th:text="${equipo.nombre}"></strong>?</p>
+                    <p class="text-danger">Esta acción no se puede deshacer y eliminará todas las solicitudes asociadas.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/equipos/{id}/eliminar(id=${equipo.id})}" method="post">
+                        <button type="submit" class="btn btn-danger">Eliminar Equipo</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html> 

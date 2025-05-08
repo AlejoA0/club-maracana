@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,13 +48,13 @@ import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
+@Slf4j
 public class AdminController {
-
-    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
     private final UsuarioService usuarioService;
     private final ReservaService reservaService;
@@ -92,22 +93,43 @@ public class AdminController {
     @PostMapping("/usuarios/guardar")
     public String guardarUsuario(@Valid @ModelAttribute("usuario") UsuarioDTO usuarioDTO,
                                  BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-        // Validar longitud de contraseña
-        if (usuarioDTO.getPassword() != null && usuarioDTO.getPassword().length() < 6) {
+        // Verificar si estamos en modo edición (el ID existe en la base de datos)
+        boolean esEdicion = usuarioService.buscarPorId(usuarioDTO.getNumeroDocumento()).isPresent();
+        
+        // Validar si existe un usuario con el mismo correo electrónico (excepto el mismo usuario en edición)
+        Optional<Usuario> usuarioExistente = usuarioService.buscarPorEmail(usuarioDTO.getEmail());
+        if (usuarioExistente.isPresent() && !usuarioExistente.get().getNumeroDocumento().equals(usuarioDTO.getNumeroDocumento())) {
+            result.rejectValue("email", "error.email", "Ya existe un usuario con este email");
+        }
+        
+        // Validación manual de la contraseña
+        if (!esEdicion && (usuarioDTO.getPassword() == null || usuarioDTO.getPassword().isEmpty())) {
+            // En creación, requerir contraseña
+            result.rejectValue("password", "error.password", "La contraseña es obligatoria");
+        } else if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty() && usuarioDTO.getPassword().length() < 6) {
+            // Validar longitud solo si se proporcionó una contraseña
             result.rejectValue("password", "error.password", "La contraseña debe tener al menos 6 caracteres");
         }
         
         if (result.hasErrors()) {
             model.addAttribute("tiposDocumento", Arrays.asList(TipoDocumento.values()));
             model.addAttribute("roles", Arrays.asList(NombreRol.values()));
+            model.addAttribute("editar", esEdicion);
             return "admin/usuarios/formulario";
         }
 
         try {
-            usuarioService.guardar(usuarioDTO);
-            redirectAttributes.addFlashAttribute("success", "Usuario guardado exitosamente");
+            // Si es edición, usar el método de actualización en lugar de guardar
+            if (esEdicion) {
+                usuarioService.actualizar(usuarioDTO.getNumeroDocumento(), usuarioDTO);
+                redirectAttributes.addFlashAttribute("success", "Usuario actualizado exitosamente");
+            } else {
+                usuarioService.guardar(usuarioDTO);
+                redirectAttributes.addFlashAttribute("success", "Usuario guardado exitosamente");
+            }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al guardar el usuario: " + e.getMessage());
+            log.error("Error al guardar/actualizar usuario: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al procesar el usuario: " + e.getMessage());
         }
 
         return "redirect:/admin/usuarios";

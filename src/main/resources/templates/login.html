@@ -32,20 +32,22 @@
                         Registro exitoso. Ahora puedes iniciar sesión. Hemos enviado un correo de confirmación a tu dirección de email.
                     </div>
 
-                    <form th:action="@{/login}" method="post">
+                    <form th:action="@{/login}" method="post" id="loginForm" onsubmit="return validarFormulario()">
                         <div class="mb-3">
                             <label for="username" class="form-label">Email</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input type="email" id="username" name="username" class="form-control" required autofocus>
+                                <input type="email" id="username" name="username" class="form-control" autofocus>
                             </div>
+                            <div class="text-danger" id="emailError" style="display: none;">Ingrese un email válido</div>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Contraseña</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input type="password" id="password" name="password" class="form-control" required>
+                                <input type="password" id="password" name="password" class="form-control">
                             </div>
+                            <div class="text-danger" id="passwordError" style="display: none;">La contraseña es obligatoria</div>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
@@ -65,5 +67,38 @@
 </main>
 
 <div th:replace="fragments/footer :: footer"></div>
+
+<script>
+    function validarEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    function validarFormulario() {
+        let esValido = true;
+        
+        // Validar email
+        const email = document.getElementById('username').value;
+        const emailError = document.getElementById('emailError');
+        if (!email || !validarEmail(email)) {
+            emailError.style.display = 'block';
+            esValido = false;
+        } else {
+            emailError.style.display = 'none';
+        }
+        
+        // Validar contraseña
+        const password = document.getElementById('password').value;
+        const passwordError = document.getElementById('passwordError');
+        if (!password) {
+            passwordError.style.display = 'block';
+            esValido = false;
+        } else {
+            passwordError.style.display = 'none';
+        }
+        
+        return esValido;
+    }
+</script>
 </body>
 </html>

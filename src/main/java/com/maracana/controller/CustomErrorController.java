@@ -1,5 +1,6 @@
 package com.maracana.controller;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -32,41 +33,36 @@ public class CustomErrorController implements ErrorController {
     @RequestMapping("/error")
     public String handleError(HttpServletRequest request, Model model) {
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        String errorMessage = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
         Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+        String exceptionType = exception != null ? exception.getClass().getName() : "Unknown";
         
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        String errorMessage = "Ha ocurrido un error inesperado";
+        log.error("Error procesando solicitud: Status={}, Message={}, Exception={}", 
+                 status, errorMessage, exceptionType);
         
         if (status != null) {
-            Integer statusCode = Integer.valueOf(status.toString());
-            httpStatus = HttpStatus.valueOf(statusCode);
+            int statusCode = Integer.parseInt(status.toString());
             
-            log.error("Error {} : {}", statusCode, request.getAttribute(RequestDispatcher.ERROR_MESSAGE));
+            model.addAttribute("statusCode", statusCode);
+            model.addAttribute("errorMessage", errorMessage != null ? errorMessage : "Sin detalles adicionales");
             
-            // Establecer mensaje según el código de estado
             if (statusCode == HttpStatus.NOT_FOUND.value()) {
-                errorMessage = "La página solicitada no pudo ser encontrada";
-            } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
-                errorMessage = "No tiene permisos para acceder a este recurso";
+                return "error/404";
             } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-                errorMessage = "Error interno del servidor";
-                
-                if (exception != null) {
-                    log.error("Excepción original: ", (Throwable) exception);
+                // Para errores 500, intentar registrar más información de la excepción
+                if (exception != null && exception instanceof Throwable) {
+                    Throwable throwable = (Throwable) exception;
+                    String stackTrace = Arrays.toString(throwable.getStackTrace());
+                    log.error("Detalles adicionales del error 500: {}\n{}", 
+                             throwable.getMessage(), stackTrace);
+                    model.addAttribute("exceptionMessage", throwable.getMessage());
                 }
+                return "error/500";
+            } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
+                return "error/403";
             }
         }
         
-        // Obtener atributos de error más completos
-        WebRequest webRequest = new ServletWebRequest(request);
-        Map<String, Object> errorAttrs = errorAttributes.getErrorAttributes(webRequest, null);
-        
-        model.addAttribute("status", httpStatus.value());
-        model.addAttribute("error", httpStatus.getReasonPhrase());
-        model.addAttribute("message", errorMessage);
-        model.addAttribute("timestamp", errorAttrs.get("timestamp"));
-        model.addAttribute("path", errorAttrs.get("path"));
-        
-        return "error"; // error.html
+        return "error";
     }
 } 

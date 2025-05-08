@@ -25,8 +25,11 @@
     <script th:fragment="script-cancelar-reserva">
         function prepararCancelacion(reservaId, esAdmin) {
             const form = document.getElementById('formCancelarReserva');
-            const ruta = esAdmin ? '/admin/reservas/cancelar/' : '/reservas/';
-            form.action = ruta + reservaId + '/cancelar';
+            if (esAdmin) {
+                form.action = '/admin/reservas/cancelar/' + reservaId;
+            } else {
+                form.action = '/reservas/' + reservaId + '/cancelar';
+            }
         }
     </script>
 </body>

@@ -8,6 +8,7 @@ import com.maracana.repository.EquipoRepository;
 import com.maracana.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EquipoService {
     
     private final EquipoRepository equipoRepository;
@@ -28,6 +30,10 @@ public class EquipoService {
     
     public List<Equipo> listarPorCategoria(TipoCancha categoria) {
         return equipoRepository.findByCategoria(categoria);
+    }
+    
+    public List<Equipo> listarPorDirectorTecnico(String directorTecnicoId) {
+        return equipoRepository.findByDirectorTecnicoNumeroDocumento(directorTecnicoId);
     }
     
     public Optional<Equipo> buscarPorId(Integer id) {

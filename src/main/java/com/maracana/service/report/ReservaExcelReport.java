@@ -39,8 +39,7 @@ public class ReservaExcelReport implements Report {
 
         try (Workbook workbook = new XSSFWorkbook(); 
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            
-            // Estilos comunes para el reporte
+
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
             
@@ -49,19 +48,19 @@ public class ReservaExcelReport implements Report {
             headerStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             
-            // Hoja principal de reservas
+
             Sheet sheet = workbook.createSheet("Reservas");
             createReservationSheet(sheet, reservas, headerStyle);
             
-            // Hoja de estadísticas por hora
+
             Sheet horaSheet = workbook.createSheet("Por Hora");
             createHoraSheet(horaSheet, headerStyle);
             
-            // Hoja de estadísticas por tipo de cancha
+
             Sheet tipoCanchaSheet = workbook.createSheet("Por Tipo Cancha");
             createTipoCanchaSheet(tipoCanchaSheet, headerStyle);
             
-            // Escribir el workbook a un OutputStream
+
             workbook.write(out);
             log.info("Reporte Excel de reservas generado con éxito");
             return out.toByteArray();
@@ -73,7 +72,7 @@ public class ReservaExcelReport implements Report {
     }
     
     private void createReservationSheet(Sheet sheet, List<Reserva> reservas, CellStyle headerStyle) {
-        // Encabezados
+
         String[] columns = {"ID", "Fecha", "Hora", "Cancha", "Estado"};
         Row headerRow = sheet.createRow(0);
         for (int i = 0; i < columns.length; i++) {
@@ -82,21 +81,20 @@ public class ReservaExcelReport implements Report {
             cell.setCellStyle(headerStyle);
         }
         
-        // Si no hay datos, agregar fila indicando que no hay reservas
+
         if (reservas.isEmpty()) {
             Row emptyRow = sheet.createRow(1);
             Cell emptyCell = emptyRow.createCell(0);
             emptyCell.setCellValue("No hay reservas para mostrar");
             sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1, 1, 0, 4));
         } else {
-            // Datos
+
             int rowNum = 1;
             for (Reserva reserva : reservas) {
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(reserva.getId() != null ? reserva.getId() : 0);
                 row.createCell(1).setCellValue(reserva.getFechaReserva() != null ? reserva.getFechaReserva().toString() : "N/A");
-                
-                // Manejo seguro de HoraReserva
+
                 String horaText;
                 try {
                     horaText = reserva.getHoraReserva() != null ? reserva.getHoraReserva().toString() : "N/A";
@@ -112,14 +110,13 @@ public class ReservaExcelReport implements Report {
             }
         }
         
-        // Ajustar ancho de columnas
+
         for (int i = 0; i < columns.length; i++) {
             sheet.autoSizeColumn(i);
         }
     }
     
     private void createHoraSheet(Sheet sheet, CellStyle headerStyle) {
-        // Encabezados
         Row headerRow = sheet.createRow(0);
         Cell headerCell1 = headerRow.createCell(0);
         headerCell1.setCellValue("Hora");
@@ -128,14 +125,12 @@ public class ReservaExcelReport implements Report {
         Cell headerCell2 = headerRow.createCell(1);
         headerCell2.setCellValue("Cantidad");
         headerCell2.setCellStyle(headerStyle);
-        
-        // Datos
+
         int rowNum = 1;
         for (HoraReserva hora : HoraReserva.values()) {
             try {
                 Row row = sheet.createRow(rowNum++);
-                
-                // Manejo seguro de toString
+
                 String horaText;
                 try {
                     horaText = hora.getHora();
@@ -144,8 +139,7 @@ public class ReservaExcelReport implements Report {
                     horaText = hora.name();
                 }
                 row.createCell(0).setCellValue(horaText);
-                
-                // Contar reservas de forma segura
+
                 long cantidad;
                 try {
                     cantidad = reservaService.contarReservasPorHora(hora);
@@ -164,7 +158,6 @@ public class ReservaExcelReport implements Report {
     }
     
     private void createTipoCanchaSheet(Sheet sheet, CellStyle headerStyle) {
-        // Encabezados
         Row headerRow = sheet.createRow(0);
         Cell headerCell1 = headerRow.createCell(0);
         headerCell1.setCellValue("Tipo de Cancha");
@@ -173,8 +166,7 @@ public class ReservaExcelReport implements Report {
         Cell headerCell2 = headerRow.createCell(1);
         headerCell2.setCellValue("Cantidad");
         headerCell2.setCellStyle(headerStyle);
-        
-        // Datos
+
         int rowNum = 1;
         for (TipoCancha tipo : TipoCancha.values()) {
             try {

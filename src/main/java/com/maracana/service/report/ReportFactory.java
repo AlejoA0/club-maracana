@@ -2,10 +2,6 @@ package com.maracana.service.report;
 
 import org.springframework.stereotype.Component;
 
-/**
- * Implementación del patrón Factory para la creación de reportes
- * Este patrón nos permite crear diferentes tipos de reportes de manera dinámica
- */
 @Component
 public class ReportFactory {
     

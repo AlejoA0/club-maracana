@@ -8,6 +8,7 @@ import com.maracana.repository.RolRepository;
 import com.maracana.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
@@ -81,8 +83,8 @@ public class UsuarioService {
             usuario.setApellidos(usuarioDTO.getApellidos());
             usuario.setEmail(usuarioDTO.getEmail());
 
-            // Solo actualizar la contraseña si se proporciona una nueva
-            if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty()) {
+            // Solo actualizar la contraseña si se proporciona una nueva y no está vacía
+            if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().trim().isEmpty()) {
                 usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
             }
 

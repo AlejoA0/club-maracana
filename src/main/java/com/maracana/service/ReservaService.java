@@ -28,14 +28,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
     private final CanchaRepository canchaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final EmailService emailService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -45,7 +46,20 @@ public class ReservaService {
     }
 
     public Page<Reserva> buscarReservas(LocalDate fecha, EstadoReserva estado, String canchaId, int pagina, int tamano) {
-        return reservaRepository.buscarReservas(fecha, estado, canchaId, PageRequest.of(pagina, tamano));
+        try {
+            log.debug("Buscando reservas con filtros - fecha:{}, estado:{}, canchaId:{}", fecha, estado, canchaId);
+            
+            // Verificar si canchaId es un string vacío y convertirlo a null
+            if (canchaId != null && canchaId.trim().isEmpty()) {
+                canchaId = null;
+            }
+            
+            return reservaRepository.buscarReservas(fecha, estado, canchaId, PageRequest.of(pagina, tamano));
+        } catch (Exception e) {
+            log.error("Error al buscar reservas: {}", e.getMessage(), e);
+            // En caso de error, devolver una página vacía
+            return Page.empty(PageRequest.of(pagina, tamano));
+        }
     }
 
     public Optional<Reserva> buscarPorId(Integer id) {
@@ -233,6 +247,14 @@ public class ReservaService {
             String mensaje = (String) query.getOutputParameterValue("p_mensaje");
 
             if (reservaId != null && reservaId > 0) {
+                // Enviar correo de confirmación
+                try {
+                    enviarCorreoConfirmacionReserva(reservaDTO, cancha, reservaId);
+                    log.info("Correo de confirmación enviado para la reserva ID: {}", reservaId);
+                } catch (Exception e) {
+                    log.error("Error al enviar correo de confirmación: {}", e.getMessage(), e);
+                    // No interrumpir el flujo si el correo falla
+                }
                 return "Reserva creada exitosamente con ID: " + reservaId;
             } else {
                 return mensaje;
@@ -243,28 +265,132 @@ public class ReservaService {
         }
     }
 
+    /**
+     * Envía un correo de confirmación al usuario que realizó la reserva
+     * @param reservaDTO datos de la reserva
+     * @param cancha la cancha reservada
+     * @param reservaId el ID de la reserva creada
+     */
+    private void enviarCorreoConfirmacionReserva(ReservaDTO reservaDTO, Cancha cancha, Integer reservaId) {
+        try {
+            // Obtener el usuario
+            Optional<Usuario> usuarioOpt = usuarioRepository.findById(reservaDTO.getUsuarioId());
+            if (usuarioOpt.isEmpty()) {
+                log.warn("No se pudo enviar correo: Usuario no encontrado con ID: {}", reservaDTO.getUsuarioId());
+                return;
+            }
+            
+            Usuario usuario = usuarioOpt.get();
+            String destinatario = usuario.getEmail();
+            String asunto = "Confirmación de Reserva - Club Deportivo Maracaná";
+            
+            // Crear el cuerpo del correo con formato HTML
+            String cuerpo = generarCuerpoCorreoReserva(usuario, cancha, reservaDTO, reservaId);
+            
+            // Enviar el correo
+            emailService.enviarCorreoIndividual(destinatario, asunto, cuerpo);
+        } catch (Exception e) {
+            log.error("Error al enviar correo de confirmación: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Genera el cuerpo HTML del correo de confirmación
+     */
+    private String generarCuerpoCorreoReserva(Usuario usuario, Cancha cancha, ReservaDTO reservaDTO, Integer reservaId) {
+        return "<!DOCTYPE html>\n" +
+               "<html>\n" +
+               "<head>\n" +
+               "    <meta charset=\"UTF-8\">\n" +
+               "    <style>\n" +
+               "        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n" +
+               "        .container { max-width: 600px; margin: 0 auto; padding: 20px; }\n" +
+               "        .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }\n" +
+               "        .content { padding: 20px; border: 1px solid #ddd; }\n" +
+               "        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; }\n" +
+               "        .reservation-details { background-color: #f9f9f9; padding: 15px; margin: 15px 0; border-left: 4px solid #4CAF50; }\n" +
+               "        .btn { display: inline-block; background-color: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; }\n" +
+               "    </style>\n" +
+               "</head>\n" +
+               "<body>\n" +
+               "    <div class=\"container\">\n" +
+               "        <div class=\"header\">\n" +
+               "            <h1>Club Social y Deportivo Maracaná</h1>\n" +
+               "        </div>\n" +
+               "        <div class=\"content\">\n" +
+               "            <h2>¡Reserva Confirmada!</h2>\n" +
+               "            <p>Hola " + usuario.getNombres() + ",</p>\n" +
+               "            <p>Tu reserva ha sido confirmada exitosamente. A continuación, encontrarás los detalles:</p>\n" +
+               "            \n" +
+               "            <div class=\"reservation-details\">\n" +
+               "                <p><strong>Número de Reserva:</strong> " + reservaId + "</p>\n" +
+               "                <p><strong>Fecha:</strong> " + reservaDTO.getFechaReserva() + "</p>\n" +
+               "                <p><strong>Hora:</strong> " + reservaDTO.getHoraReserva().getHora() + "</p>\n" +
+               "                <p><strong>Cancha:</strong> " + cancha.getCodigo() + " - " + cancha.getTipo() + "</p>\n" +
+               "            </div>\n" +
+               "            \n" +
+               "            <p>Recuerda llegar al menos 15 minutos antes de tu reserva.</p>\n" +
+               "            <p>Si necesitas cancelar tu reserva, puedes hacerlo a través de nuestra plataforma hasta 24 horas antes.</p>\n" +
+               "            \n" +
+               "            <p><a href=\"http://localhost:8080/reservas\" class=\"btn\">Ver Mis Reservas</a></p>\n" +
+               "        </div>\n" +
+               "        <div class=\"footer\">\n" +
+               "            <p>Este es un correo automático, por favor no responder.</p>\n" +
+               "            <p>&copy; 2023 Club Social y Deportivo Maracaná. Todos los derechos reservados.</p>\n" +
+               "        </div>\n" +
+               "    </div>\n" +
+               "</body>\n" +
+               "</html>";
+    }
+
     @Transactional
     public String eliminarReserva(Integer reservaId) {
         try {
-            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_eliminar_reserva");
-
-            // Registrar los parámetros
-            query.registerStoredProcedureParameter("p_reserva_id", Integer.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
-
-            // Establecer los valores de los parámetros
-            query.setParameter("p_reserva_id", reservaId);
-
-            // Ejecutar el procedimiento almacenado
-            query.execute();
-
-            // Obtener el resultado
-            String mensaje = (String) query.getOutputParameterValue("p_mensaje");
-
-            return mensaje;
+            log.info("Intentando eliminar reserva con ID: {}", reservaId);
+            
+            // Verificar que la reserva existe antes de intentar eliminarla
+            Optional<Reserva> reservaOpt = reservaRepository.findById(reservaId);
+            if (reservaOpt.isEmpty()) {
+                log.warn("No se encontró ninguna reserva con ID: {}", reservaId);
+                return "Error: No se encontró la reserva seleccionada";
+            }
+            
+            Reserva reserva = reservaOpt.get();
+            
+            // Si la reserva ya está cancelada, no hacer nada
+            if (reserva.getEstadoReserva() == EstadoReserva.CANCELADA) {
+                log.warn("La reserva con ID: {} ya está cancelada", reservaId);
+                return "La reserva ya está cancelada";
+            }
+            
+            // Actualizar el estado directamente
+            reserva.setEstadoReserva(EstadoReserva.CANCELADA);
+            reservaRepository.save(reserva);
+            log.info("Reserva con ID: {} cancelada exitosamente", reservaId);
+            
+            // Como respaldo, intentar también llamar al procedimiento almacenado
+            try {
+                StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_eliminar_reserva");
+                
+                // Registrar los parámetros
+                query.registerStoredProcedureParameter("p_reserva_id", Integer.class, ParameterMode.IN);
+                query.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
+                
+                // Establecer los valores de los parámetros
+                query.setParameter("p_reserva_id", reservaId);
+                
+                // Ejecutar el procedimiento almacenado
+                query.execute();
+                log.debug("Procedimiento almacenado sp_eliminar_reserva ejecutado con éxito");
+            } catch (Exception e) {
+                // Si falla el procedimiento almacenado, ya tenemos la actualización directa
+                log.warn("Error al ejecutar el procedimiento almacenado, pero la reserva fue cancelada directamente: {}", e.getMessage());
+            }
+            
+            return "Reserva cancelada exitosamente";
         } catch (Exception e) {
-            log.error("Error al eliminar la reserva", e);
-            return "Error al eliminar la reserva: " + e.getMessage();
+            log.error("Error al cancelar la reserva: {}", e.getMessage(), e);
+            return "Error al cancelar la reserva: " + e.getMessage();
         }
     }
 

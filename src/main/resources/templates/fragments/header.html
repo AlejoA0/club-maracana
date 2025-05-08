@@ -27,8 +27,11 @@
                         <li class="nav-item" sec:authorize="hasAnyRole('JUGADOR', 'ADMIN')">
                             <a class="nav-link" th:href="@{/reservas}">Mis Reservas</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/equipos}">Equipos</a>
+                        </li>
                         <li class="nav-item" sec:authorize="hasRole('DIRECTOR_TECNICO')">
-                            <a class="nav-link" th:href="@{/equipos}">Mis Equipos</a>
+                            <a class="nav-link" th:href="@{/equipos/mis-equipos}">Mis Equipos</a>
                         </li>
                         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                             <a class="nav-link" th:href="@{/admin}">Panel Admin</a>

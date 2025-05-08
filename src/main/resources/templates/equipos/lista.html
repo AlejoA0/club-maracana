@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipos - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .equipo-card {
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        .equipo-card:hover {
+            transform: translateY(-5px);
+        }
+        .equipo-logo {
+            height: 120px;
+            object-fit: contain;
+            padding: 10px;
+        }
+        .card-footer {
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        .categoria-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">Equipos</h1>
+            <div>
+                <a sec:authorize="hasRole('ROLE_DIRECTOR_TECNICO')" th:href="@{/equipos/mis-equipos}" class="btn btn-outline-success me-2">
+                    <i class="fas fa-user-shield"></i> Mis Equipos
+                </a>
+                <a sec:authorize="hasRole('ROLE_DIRECTOR_TECNICO')" th:href="@{/equipos/nuevo}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Crear Equipo
+                </a>
+            </div>
+        </div>
+        
+        <!-- Filtro por categoría -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/equipos}" method="get" class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <label for="categoria" class="form-label">Filtrar por Categoría</label>
+                        <select id="categoria" name="categoria" class="form-select">
+                            <option value="">Todas las categorías</option>
+                            <option th:each="cat : ${categorias}" 
+                                    th:value="${cat}" 
+                                    th:text="${cat.name().replace('_', ' ')}"
+                                    th:selected="${categoria == cat}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Listado de equipos -->
+        <div th:if="${#lists.isEmpty(equipos)}" class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No hay equipos disponibles.
+        </div>
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col" th:each="equipo : ${equipos}">
+                <div class="card h-100 equipo-card">
+                    <div class="text-center pt-3">
+                        <img th:if="${equipo.logo != null}" 
+                             th:src="@{'/equipos/' + ${equipo.id} + '/logo'}" 
+                             class="equipo-logo" 
+                             th:alt="${equipo.nombre}">
+                        <img th:unless="${equipo.logo != null}" 
+                             th:src="@{/images/default-team-logo.png}" 
+                             class="equipo-logo" 
+                             alt="Logo por defecto">
+                        <span th:class="'badge categoria-badge bg-' + (${equipo.categoria.name() == 'FUTBOL_11' ? 'primary' : (${equipo.categoria.name() == 'FUTBOL_8' ? 'success' : 'warning')})">
+                            <i class="fas fa-futbol"></i> 
+                            <span th:text="${equipo.categoria.name().replace('_', ' ')}"></span>
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${equipo.nombre}"></h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-user-tie"></i> Director Técnico: 
+                                <span th:text="${equipo.directorTecnico.nombres + ' ' + equipo.directorTecnico.apellidos}"></span>
+                            </small>
+                        </p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-users"></i> Jugadores: 
+                                <span th:text="${equipo.jugadores.size()}"></span>
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            <a th:href="@{/equipos/{id}(id=${equipo.id})}" class="btn btn-outline-success">
+                                <i class="fas fa-info-circle"></i> Ver detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html> 

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Equipos - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .equipo-card {
+            transition: transform 0.3s ease;
+        }
+        .equipo-card:hover {
+            transform: translateY(-5px);
+        }
+        .equipo-logo {
+            height: 100px;
+            object-fit: contain;
+            padding: 10px;
+        }
+        .badge-corner {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .stats-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <main class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Mis Equipos</h1>
+            <div>
+                <a th:href="@{/equipos}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-list"></i> Ver todos los equipos
+                </a>
+                <a th:href="@{/equipos/nuevo}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Crear Equipo
+                </a>
+            </div>
+        </div>
+        
+        <!-- Mensaje informativo si no tiene equipos -->
+        <div th:if="${#lists.isEmpty(equipos)}" class="alert alert-info">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle fa-2x me-3"></i>
+                <div>
+                    <h4 class="alert-heading">No tienes equipos</h4>
+                    <p class="mb-0">Aún no has creado ningún equipo. ¡Crea tu primer equipo para comenzar!</p>
+                </div>
+            </div>
+            <hr>
+            <div class="d-grid gap-2 col-md-6 mx-auto mt-3">
+                <a th:href="@{/equipos/nuevo}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Crear mi primer equipo
+                </a>
+            </div>
+        </div>
+        
+        <!-- Si tiene equipos los mostramos -->
+        <div th:unless="${#lists.isEmpty(equipos)}">
+            <!-- Tarjetas de estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">Total Equipos</h5>
+                                <h3 class="mb-0 mt-2" th:text="${equipos.size()}"></h3>
+                            </div>
+                            <i class="fas fa-shield-alt fa-3x text-success opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">Total Jugadores</h5>
+                                <h3 class="mb-0 mt-2" th:text="${totalJugadores}"></h3>
+                            </div>
+                            <i class="fas fa-users fa-3x text-success opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">Solicitudes Pendientes</h5>
+                                <h3 class="mb-0 mt-2" th:text="${solicitudesPendientes}"></h3>
+                            </div>
+                            <i class="fas fa-clipboard-list fa-3x text-success opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Listado de equipos -->
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                <div class="col" th:each="equipo : ${equipos}">
+                    <div class="card h-100 equipo-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <img th:if="${equipo.logo != null}" 
+                                         th:src="@{'/equipos/' + ${equipo.id} + '/logo'}" 
+                                         class="equipo-logo" 
+                                         th:alt="${equipo.nombre}">
+                                    <img th:unless="${equipo.logo != null}" 
+                                         th:src="@{/images/default-team-logo.png}" 
+                                         class="equipo-logo" 
+                                         alt="Logo por defecto">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="card-title" th:text="${equipo.nombre}"></h5>
+                                        <span th:class="'badge bg-' + (${equipo.categoria.name() == 'FUTBOL_11' ? 'primary' : (${equipo.categoria.name() == 'FUTBOL_8' ? 'success' : 'warning')})">
+                                            <span th:text="${equipo.categoria.name().replace('_', ' ')}"></span>
+                                        </span>
+                                    </div>
+                                    <p class="card-text mt-2">
+                                        <span class="badge bg-success me-2">
+                                            <i class="fas fa-users"></i> 
+                                            <span th:text="${equipo.jugadores.size()} + ' jugadores'"></span>
+                                        </span>
+                                        
+                                        <span th:if="${equipo.solicitudes.size() > 0}" class="badge bg-warning">
+                                            <i class="fas fa-clipboard-list"></i> 
+                                            <span th:text="${equipo.solicitudes.size()} + ' solicitudes'"></span>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0">
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/equipos/{id}(id=${equipo.id})}" class="btn btn-outline-success">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+                                <a th:href="@{/equipos/{id}/solicitudes(id=${equipo.id})}" class="btn btn-outline-primary">
+                                    <i class="fas fa-clipboard-list"></i> Solicitudes
+                                    <span th:if="${equipo.solicitudes.size() > 0}" class="badge bg-danger ms-1" th:text="${equipo.solicitudes.size()}"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html> 

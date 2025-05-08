@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface JugadorRepository extends JpaRepository<Jugador, String> {
     List<Jugador> findByEquipo(Equipo equipo);
     List<Jugador> findByCategoria(TipoCancha categoria);
+    Optional<Jugador> findByUsuarioNumeroDocumento(String numeroDocumento);
+    List<Jugador> findByEquipoId(Integer equipoId);
 }

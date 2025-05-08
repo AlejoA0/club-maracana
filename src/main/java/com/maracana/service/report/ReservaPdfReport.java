@@ -47,13 +47,12 @@ public class ReservaPdfReport implements Report {
             PdfWriter writer = PdfWriter.getInstance(document, out);
             document.open();
 
-            // Título
             Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
             Paragraph title = new Paragraph("Reporte de Reservas", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
             
-            // Fecha del reporte
+
             Font dateFont = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.ITALIC, BaseColor.DARK_GRAY);
             Paragraph date = new Paragraph("Generado: " + java.time.LocalDateTime.now().toString(), dateFont);
             date.setAlignment(Element.ALIGN_RIGHT);
@@ -61,27 +60,22 @@ public class ReservaPdfReport implements Report {
             
             document.add(Chunk.NEWLINE);
 
-            // Si no hay reservas, mostrar mensaje
             if (reservas.isEmpty()) {
                 Paragraph noData = new Paragraph("No hay reservas para mostrar");
                 noData.setAlignment(Element.ALIGN_CENTER);
                 document.add(noData);
             } else {
-                // Tabla de reservas
                 PdfPTable table = new PdfPTable(5); // 5 columnas
                 table.setWidthPercentage(100);
                 float[] columnWidths = {0.1f, 0.25f, 0.2f, 0.2f, 0.25f};
                 table.setWidths(columnWidths);
 
-                // Encabezados
                 addTableHeader(table);
 
-                // Datos
                 for (Reserva reserva : reservas) {
                     table.addCell(String.valueOf(reserva.getId()));
                     table.addCell(reserva.getFechaReserva() != null ? reserva.getFechaReserva().toString() : "N/A");
-                    
-                    // Manejo seguro de HoraReserva
+
                     String horaText;
                     try {
                         horaText = reserva.getHoraReserva() != null ? reserva.getHoraReserva().toString() : "N/A";
@@ -99,16 +93,13 @@ public class ReservaPdfReport implements Report {
                 document.add(table);
                 document.add(Chunk.NEWLINE);
 
-                // Gráficos
                 document.add(new Paragraph("Estadísticas de Reservas", titleFont));
                 document.add(Chunk.NEWLINE);
 
-                // Gráfico de reservas por hora
                 document.add(new Paragraph("Reservas por Hora:"));
                 document.add(generarTablaEstadisticasPorHora());
                 document.add(Chunk.NEWLINE);
 
-                // Gráfico de reservas por tipo de cancha
                 document.add(new Paragraph("Reservas por Tipo de Cancha:"));
                 document.add(generarTablaEstadisticasPorTipoCancha());
             }
@@ -154,7 +145,6 @@ public class ReservaPdfReport implements Report {
             float[] columnWidths = {0.7f, 0.3f};
             table.setWidths(columnWidths);
 
-            // Encabezados
             PdfPCell headerCell1 = new PdfPCell(new Phrase("Hora", FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
             headerCell1.setHorizontalAlignment(Element.ALIGN_CENTER);
             headerCell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -167,10 +157,8 @@ public class ReservaPdfReport implements Report {
             headerCell2.setPadding(5);
             table.addCell(headerCell2);
 
-            // Datos
             for (HoraReserva hora : HoraReserva.values()) {
                 try {
-                    // Usar hora.getHora() para mostrar el valor legible como "07:00:00"
                     PdfPCell cell1 = new PdfPCell(new Phrase(hora.getHora()));
                     cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
                     cell1.setPadding(5);
@@ -205,7 +193,6 @@ public class ReservaPdfReport implements Report {
             float[] columnWidths = {0.7f, 0.3f};
             table.setWidths(columnWidths);
 
-            // Encabezados
             PdfPCell headerCell1 = new PdfPCell(new Phrase("Tipo de Cancha", FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
             headerCell1.setHorizontalAlignment(Element.ALIGN_CENTER);
             headerCell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -218,7 +205,6 @@ public class ReservaPdfReport implements Report {
             headerCell2.setPadding(5);
             table.addCell(headerCell2);
 
-            // Datos
             for (TipoCancha tipo : TipoCancha.values()) {
                 PdfPCell cell1 = new PdfPCell(new Phrase(tipo.toString()));
                 cell1.setHorizontalAlignment(Element.ALIGN_CENTER);

@@ -36,8 +36,7 @@ public class UsuarioDTO {
     @Email(message = "El email debe tener un formato válido")
     private String email;
     
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres", groups = PasswordValidationGroup.class)
     private String password;
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -52,6 +51,8 @@ public class UsuarioDTO {
     private Boolean activo = true;
     
     private Set<String> roles;
+    
+    public interface PasswordValidationGroup {}
 
     // Getters y Setters
     public String getNumeroDocumento() {

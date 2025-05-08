@@ -14,4 +14,5 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
     List<Equipo> findByCategoria(TipoCancha categoria);
     Optional<Equipo> findByNombre(String nombre);
     boolean existsByDirectorTecnico(Usuario directorTecnico);
+    List<Equipo> findByDirectorTecnicoNumeroDocumento(String numeroDocumento);
 }

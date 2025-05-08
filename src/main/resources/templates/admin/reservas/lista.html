@@ -29,7 +29,7 @@
                 <h5 class="mb-0">Filtros</h5>
             </div>
             <div class="card-body">
-                <form th:action="@{/admin/reservas}" method="get">
+                <form th:action="@{/admin/reservas}" method="get" id="filtroForm">
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="fecha" class="form-label">Fecha</label>
@@ -54,7 +54,7 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end">
-                        <a th:href="@{/admin/reservas}" class="btn btn-secondary me-2">Limpiar</a>
+                        <button type="button" class="btn btn-secondary me-2" onclick="limpiarFiltros()">Limpiar</button>
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-search"></i> Filtrar
                         </button>
@@ -130,5 +130,13 @@
     <div th:replace="fragments/modal-cancelar-reserva :: modal-cancelar-reserva"></div>
     <div th:replace="fragments/footer :: footer"></div>
     <script th:replace="fragments/modal-cancelar-reserva :: script-cancelar-reserva"></script>
+    <script>
+        function limpiarFiltros() {
+            document.getElementById('fecha').value = '';
+            document.getElementById('estado').value = '';
+            document.getElementById('canchaId').value = '';
+            document.getElementById('filtroForm').submit();
+        }
+    </script>
 </body>
 </html>
