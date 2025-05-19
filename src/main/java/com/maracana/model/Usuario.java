@@ -71,9 +71,6 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private Jugador jugador;
 
-    @OneToMany(mappedBy = "directorTecnico", cascade = CascadeType.ALL)
-    private Set<Equipo> equipos = new HashSet<>();
-
     public String getNombreCompleto() {
         return nombres + " " + apellidos;
     }

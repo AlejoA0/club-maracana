@@ -93,6 +93,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     @Query(value = "SELECT COUNT(*) FROM reserva r WHERE r.hora_reserva LIKE CONCAT(:horaPrefix, '%')", nativeQuery = true)
     long countByHoraLike(@Param("horaPrefix") String horaPrefix);
     
-    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.cancha.tipo = :tipo")
+    @Query(value = "SELECT COUNT(*) FROM reserva r JOIN cancha c ON r.cancha_id = c.id WHERE c.tipo = :tipo", nativeQuery = true)
     long countByTipoCancha(@Param("tipo") String tipo);
 }

@@ -137,11 +137,6 @@
                             <i class="fas fa-calendar-alt"></i> Mis Reservas
                         </a>
                     </li>
-                    <li class="nav-item" sec:authorize="hasRole('DIRECTOR_TECNICO')">
-                        <a class="nav-link" th:href="@{/equipos}">
-                            <i class="fas fa-users"></i> Mi Equipo
-                        </a>
-                    </li>
                     <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                         <a class="nav-link" th:href="@{/admin}">
                             <i class="fas fa-cog"></i> Administración
@@ -210,11 +205,11 @@
                 
                 <div class="col-md-4">
                     <div class="card feature-card">
-                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1336&q=80" class="card-img-top" alt="Equipos y torneos">
+                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1336&q=80" class="card-img-top" alt="Instalaciones premium">
                         <div class="card-body text-center">
                             <i class="fas fa-trophy feature-icon"></i>
-                            <h3 class="card-title h4 mb-3">Equipos y Torneos</h3>
-                            <p class="card-text">Forma parte de nuestros equipos o inscribe el tuyo propio para participar en torneos durante todo el año.</p>
+                            <h3 class="card-title h4 mb-3">Instalaciones Premium</h3>
+                            <p class="card-text">Disfrutad de las mejores instalaciones para la práctica deportiva con todas las comodidades.</p>
                         </div>
                     </div>
                 </div>

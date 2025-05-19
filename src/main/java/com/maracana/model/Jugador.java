@@ -3,15 +3,14 @@ package com.maracana.model;
 import com.maracana.model.enums.TipoCancha;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.HashSet;
-import java.util.Set;
+import lombok.Setter;
 
 @Entity
 @Table(name = "jugador")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Jugador {
@@ -25,14 +24,7 @@ public class Jugador {
     @JoinColumn(name = "numero_documento")
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "id_equipo")
-    private Equipo equipo;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria", nullable = false)
     private TipoCancha categoria;
-
-    @OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL)
-    private Set<SolicitudUnion> solicitudes = new HashSet<>();
 }

@@ -1,6 +1,5 @@
 package com.maracana.repository;
 
-import com.maracana.model.Equipo;
 import com.maracana.model.Jugador;
 import com.maracana.model.enums.TipoCancha;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,8 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface JugadorRepository extends JpaRepository<Jugador, String> {
-    List<Jugador> findByEquipo(Equipo equipo);
     List<Jugador> findByCategoria(TipoCancha categoria);
     Optional<Jugador> findByUsuarioNumeroDocumento(String numeroDocumento);
-    List<Jugador> findByEquipoId(Integer equipoId);
 }

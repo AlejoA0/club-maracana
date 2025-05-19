@@ -1,9 +1,12 @@
 package com.maracana.controller;
 
+import com.maracana.model.Jugador;
 import com.maracana.model.Usuario;
+import com.maracana.repository.JugadorRepository;
 import com.maracana.service.UsuarioService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -16,11 +19,15 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/perfil")
-@RequiredArgsConstructor
-@Slf4j
 public class PerfilController {
 
-    private final UsuarioService usuarioService;
+    private static final Logger log = LoggerFactory.getLogger(PerfilController.class);
+    
+    @Autowired
+    private UsuarioService usuarioService;
+    
+    @Autowired
+    private JugadorRepository jugadorRepository;
 
     @GetMapping
     public String mostrarPerfil(Model model, RedirectAttributes redirectAttributes) {

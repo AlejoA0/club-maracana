@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,9 +54,6 @@
                         <span th:if="${esJugador}" class="badge bg-success role-badge">
                             <i class="fas fa-futbol"></i> Jugador
                         </span>
-                        <span th:if="${esDirectorTecnico}" class="badge bg-primary role-badge">
-                            <i class="fas fa-user-tie"></i> Director Técnico
-                        </span>
                         <span th:if="${esAdmin}" class="badge bg-danger role-badge">
                             <i class="fas fa-user-shield"></i> Administrador
                         </span>
@@ -110,20 +107,6 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-6 mb-4" th:if="${esDirectorTecnico}">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h4 class="mb-0"><i class="fas fa-users"></i> Mis Equipos</h4>
-                            </div>
-                            <div class="card-body">
-                                <p>Gestiona tus equipos y jugadores</p>
-                                <a th:href="@{/equipos/mis-equipos}" class="btn btn-outline-primary">
-                                    <i class="fas fa-shield-alt"></i> Ver Mis Equipos
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <div class="col-md-6 mb-4" th:if="${esAdmin}">
                         <div class="card h-100">
                             <div class="card-header bg-danger text-white">
@@ -133,20 +116,6 @@
                                 <p>Accede al panel de administración</p>
                                 <a th:href="@{/admin}" class="btn btn-outline-danger">
                                     <i class="fas fa-tachometer-alt"></i> Panel Admin
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-success text-white">
-                                <h4 class="mb-0"><i class="fas fa-futbol"></i> Equipos</h4>
-                            </div>
-                            <div class="card-body">
-                                <p>Explora los equipos disponibles y únete a uno</p>
-                                <a th:href="@{/equipos}" class="btn btn-outline-success">
-                                    <i class="fas fa-users"></i> Ver Equipos
                                 </a>
                             </div>
                         </div>

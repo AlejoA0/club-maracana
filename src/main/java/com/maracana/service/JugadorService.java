@@ -6,19 +6,23 @@ import com.maracana.model.enums.TipoCancha;
 import com.maracana.repository.JugadorRepository;
 import com.maracana.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class JugadorService {
 
-    private final JugadorRepository jugadorRepository;
-    private final UsuarioRepository usuarioRepository;
+    private static final Logger log = LoggerFactory.getLogger(JugadorService.class);
+    
+    @Autowired
+    private JugadorRepository jugadorRepository;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
     
     /**
      * Obtiene un jugador existente o crea uno nuevo si no existe
@@ -47,23 +51,5 @@ public class JugadorService {
             
             return jugadorRepository.save(nuevoJugador);
         }
-    }
-    
-    /**
-     * Asigna un jugador a un equipo
-     */
-    @Transactional
-    public Jugador asignarEquipo(Jugador jugador, com.maracana.model.Equipo equipo) {
-        jugador.setEquipo(equipo);
-        return jugadorRepository.save(jugador);
-    }
-    
-    /**
-     * Remueve a un jugador de su equipo actual
-     */
-    @Transactional
-    public Jugador removerDeEquipo(Jugador jugador) {
-        jugador.setEquipo(null);
-        return jugadorRepository.save(jugador);
     }
 } 

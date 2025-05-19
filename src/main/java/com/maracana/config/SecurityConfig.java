@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.core.GrantedAuthority;
 
 import com.maracana.service.CustomUserDetailsService;
 
@@ -29,7 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/error").permitAll()
                         .requestMatchers("/", "/index", "/registro", "/login").permitAll()
                         .requestMatchers("/admin/**", "/debug/**").hasRole("ADMIN")
-                        .requestMatchers("/equipos/**").hasRole("DIRECTOR_TECNICO")
+                        .requestMatchers("/equipos/**").hasAnyRole("JUGADOR", "DIRECTOR_TECNICO", "ADMIN")
                         .requestMatchers("/reservas/**").hasAnyRole("JUGADOR", "ADMIN", "DIRECTOR_TECNICO")
                         .anyRequest().authenticated()
                 )
@@ -37,7 +39,7 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/reservas")
+                        .successHandler(customAuthenticationSuccessHandler())
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -61,6 +63,28 @@ public class SecurityConfig {
             public boolean matches(CharSequence rawPassword, String encodedPassword) {
                 return rawPassword.toString().equals(encodedPassword); // Comparar en texto plano
             }
+        };
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            // Default URL
+            String targetUrl = "/reservas";
+            
+            // Check user roles and redirect accordingly
+            for (GrantedAuthority auth : authentication.getAuthorities()) {
+                if (auth.getAuthority().equals("ROLE_ADMIN")) {
+                    targetUrl = "/admin";
+                    break;
+                } else if (auth.getAuthority().equals("ROLE_DIRECTOR_TECNICO")) {
+                    targetUrl = "/reservas";
+                    break;
+                }
+            }
+            
+            // Redirect to the appropriate URL
+            response.sendRedirect(targetUrl);
         };
     }
 }

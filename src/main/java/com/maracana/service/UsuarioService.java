@@ -11,12 +11,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,5 +127,57 @@ public class UsuarioService {
 
     public boolean existeEmail(String email) {
         return usuarioRepository.existsByEmail(email);
+    }
+
+    /**
+     * Actualiza la sesión del usuario con sus roles actualizados
+     * @param usuarioId El ID del usuario cuya sesión se actualizará
+     * @return true si la sesión se actualizó correctamente, false si no
+     */
+    public boolean actualizarSesionUsuario(String usuarioId) {
+        try {
+            Optional<Usuario> optUsuario = buscarPorId(usuarioId);
+            if (optUsuario.isEmpty()) {
+                log.error("No se pudo encontrar el usuario para actualizar la sesión: {}", usuarioId);
+                return false;
+            }
+            
+            Usuario usuario = optUsuario.get();
+            
+            // Obtener la autenticación actual
+            Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+            
+            // Verificar que el usuario autenticado sea el mismo que estamos actualizando
+            if (!currentAuth.getName().equals(usuario.getEmail())) {
+                log.warn("Intento de actualizar sesión para un usuario diferente al autenticado");
+                return false;
+            }
+            
+            // Crear la lista de autoridades actualizada basada en los roles del usuario
+            List<GrantedAuthority> updatedAuthorities = new ArrayList<>();
+            
+            for (Rol rol : usuario.getRoles()) {
+                updatedAuthorities.add(new SimpleGrantedAuthority(rol.getNombre().name()));
+            }
+            
+            // Crear una nueva autenticación con las autoridades actualizadas
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    currentAuth.getPrincipal(), 
+                    currentAuth.getCredentials(), 
+                    updatedAuthorities);
+            
+            // Actualizar el contexto de seguridad
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+            
+            log.info("Sesión actualizada para usuario {}: {}", usuarioId,
+                    updatedAuthorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(", ")));
+            
+            return true;
+        } catch (Exception e) {
+            log.error("Error al actualizar la sesión del usuario: {}", e.getMessage(), e);
+            return false;
+        }
     }
 }

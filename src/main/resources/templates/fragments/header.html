@@ -12,7 +12,7 @@
     <header th:fragment="header">
         <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2D5A27;">
             <div class="container">
-                <a class="navbar-brand" th:href="@{/}">
+                <a class="navbar-brand" th:href="${#authorization.expression('isAuthenticated()') ? '/reservas' : '/'}">
                     <span class="text-warning fw-bold">Maracaná</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -22,16 +22,13 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item" sec:authorize="isAuthenticated()">
+                            <a class="nav-link" th:href="@{/reservas}">Inicio</a>
+                        </li>
+                        <li class="nav-item" sec:authorize="!isAuthenticated()">
                             <a class="nav-link" th:href="@{/}">Inicio</a>
                         </li>
                         <li class="nav-item" sec:authorize="hasAnyRole('JUGADOR', 'ADMIN')">
                             <a class="nav-link" th:href="@{/reservas}">Mis Reservas</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/equipos}">Equipos</a>
-                        </li>
-                        <li class="nav-item" sec:authorize="hasRole('DIRECTOR_TECNICO')">
-                            <a class="nav-link" th:href="@{/equipos/mis-equipos}">Mis Equipos</a>
                         </li>
                         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                             <a class="nav-link" th:href="@{/admin}">Panel Admin</a>
