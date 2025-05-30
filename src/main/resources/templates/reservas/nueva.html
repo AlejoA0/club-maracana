@@ -19,10 +19,10 @@
             <div class="card-body">
                 <div class="progress mb-4">
                     <div class="progress-bar bg-success" role="progressbar" 
-                         th:style="'width: ' + (${paso} * 33.33) + '%'" 
-                         th:aria-valuenow="${paso * 33.33}" 
+                         th:style="'width: ' + (${paso} * 25) + '%'" 
+                         th:aria-valuenow="${paso * 25}" 
                          aria-valuemin="0" aria-valuemax="100">
-                        Paso <span th:text="${paso}"></span> de 3
+                        Paso <span th:text="${paso}"></span> de 4
                     </div>
                 </div>
                 
@@ -82,7 +82,7 @@
                         </div>
                     </div>
                     
-                    <form th:if="${not #lists.isEmpty(canchas)}" th:action="@{/reservas/nueva/confirmar}" th:object="${reservaDTO}" method="post" id="paso3Form">
+                    <form th:if="${not #lists.isEmpty(canchas)}" th:action="@{/reservas/nueva/seleccion-cancha}" th:object="${reservaDTO}" method="post" id="paso3Form">
                         <input type="hidden" th:field="*{fechaReserva}">
                         <input type="hidden" th:field="*{horaReserva}">
                         <input type="hidden" id="canchaId" th:field="*{canchaId}">

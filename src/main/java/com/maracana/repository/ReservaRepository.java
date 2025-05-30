@@ -2,6 +2,7 @@ package com.maracana.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -95,4 +96,11 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     
     @Query(value = "SELECT COUNT(*) FROM reserva r JOIN cancha c ON r.cancha_id = c.id WHERE c.tipo = :tipo", nativeQuery = true)
     long countByTipoCancha(@Param("tipo") String tipo);
+    
+    /**
+     * Busca la última reserva creada por un usuario específico
+     * @param usuario el usuario cuya última reserva se busca
+     * @return la última reserva creada o null si no hay reservas
+     */
+    Optional<Reserva> findTopByUsuarioOrderByIdDesc(Usuario usuario);
 }

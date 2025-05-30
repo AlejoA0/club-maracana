@@ -504,4 +504,23 @@ public class ReservaService {
             return 0;
         }
     }
+    
+    /**
+     * Busca la última reserva creada por un usuario específico
+     * @param usuario el usuario cuya última reserva se busca
+     * @return Optional con la última reserva creada o empty si no hay reservas
+     */
+    public Optional<Reserva> buscarUltimaReservaPorUsuario(Usuario usuario) {
+        try {
+            if (usuario == null) {
+                log.warn("Se intentó buscar reservas para un usuario nulo");
+                return Optional.empty();
+            }
+            return reservaRepository.findTopByUsuarioOrderByIdDesc(usuario);
+        } catch (Exception e) {
+            log.error("Error al buscar la última reserva del usuario {}: {}", 
+                    usuario.getNumeroDocumento(), e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
 }
