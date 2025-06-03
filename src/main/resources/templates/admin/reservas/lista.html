@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Reservas - Club Social y Deportivo Maracaná</title>
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-</head>
+<head th:replace="fragments/layout :: head('Gestión de Reservas - Club Social y Deportivo Maracaná')"></head>
 <body>
-    <div th:replace="fragments/header :: header"></div>
+    <div th:replace="fragments/layout :: main-layout(~{::div.contenido-principal})">
+        <div class="contenido-principal">
     
     <main class="container my-5">
         <h2 class="text-success mb-4">Gestión de Reservas</h2>
@@ -128,7 +122,10 @@
     </main>
     
     <div th:replace="fragments/modal-cancelar-reserva :: modal-cancelar-reserva"></div>
-    <div th:replace="fragments/footer :: footer"></div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para esta página -->
     <script th:replace="fragments/modal-cancelar-reserva :: script-cancelar-reserva"></script>
     <script>
         function limpiarFiltros() {

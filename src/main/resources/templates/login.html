@@ -9,9 +9,9 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/layout :: main-layout(~{::main})">
 
-<main class="container my-5">
+    <main class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow">
@@ -64,9 +64,8 @@
             </div>
         </div>
     </div>
-</main>
-
-<div th:replace="fragments/footer :: footer"></div>
+    </main>
+</div>
 
 <script>
     function validarEmail(email) {

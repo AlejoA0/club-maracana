@@ -1,34 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club Social y Deportivo Maracaná</title>
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+<head th:replace="fragments/layout :: head('Club Social y Deportivo Maracaná')"></head>
+<body>
+<div th:replace="fragments/layout :: main-layout(~{::div.contenido-principal})">
+    <div class="contenido-principal">
     <style>
         :root {
-            --primary-color: #2D5A27;
+            --primary-color: #38A169;
             --secondary-color: #FFE77A;
             --accent-color: #3A7CA5;
         }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 0;
-            overflow-x: hidden;
-            background-color: #f8f9fa;
-        }
-        
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1508098682722-e99c643e7f3c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/images/cancha.webp');
             background-size: cover;
             background-position: center;
             color: white;
-            padding: 120px 0;
+            padding: 80px 0;
             min-height: 80vh;
             display: flex;
             align-items: center;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hero-content {
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        
+        .logo-container {
+            background-color: rgba(245, 245, 245);
+            border-radius: 50%;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .logo-animation {
+            transition: all 0.6s ease;
+            max-width: 75%;
+            border-radius: 10%;
+        }
+        
+        .logo-container:hover {
+            background-color: rgba(45, 90, 39, 0.1);
+        }
+        
+        .logo-container:hover .logo-animation {
+            border-radius: 50%;
+            transform: rotate(5deg);
         }
         
         .feature-card {
@@ -83,89 +119,31 @@
             border: none;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
-        
-        .navbar {
-            background-color: var(--primary-color) !important;
-        }
-        
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-        
-        .navbar .nav-link {
-            color: white !important;
-            padding: 10px 15px;
-            font-weight: 500;
-        }
-        
-        .navbar .nav-link:hover {
-            color: var(--secondary-color) !important;
-        }
-        
-        .footer {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 3rem 0;
-        }
     </style>
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-futbol"></i> Club Maracaná
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="nav-link" th:href="@{/login}">
-                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="nav-link" th:href="@{/registro}">
-                            <i class="fas fa-user-plus"></i> Registro
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/reservas}">
-                            <i class="fas fa-calendar-alt"></i> Mis Reservas
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                        <a class="nav-link" th:href="@{/admin}">
-                            <i class="fas fa-cog"></i> Administración
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/logout}">
-                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
     <!-- Hero Section -->
     <section class="hero-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
-                    <h1 class="display-3 fw-bold mb-4">Club Social y Deportivo Maracaná</h1>
-                    <p class="lead fs-4 mb-4">El mejor complejo deportivo para jugadores y equipos de fútbol en Bogotá</p>
-                    <div class="d-flex gap-3 flex-wrap">
-                        <a th:href="@{/login}" class="btn btn-primary btn-lg px-4 py-2">
-                            <i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión
-                        </a>
-                        <a th:href="@{/registro}" class="btn btn-secondary btn-lg px-4 py-2">
-                            <i class="fas fa-user-plus me-2"></i> Registrarse
-                        </a>
+        <div class="container h-100">
+            <div class="row h-100 align-items-center">
+                <!-- Contenido de texto a la izquierda -->
+                <div class="col-lg-7">
+                    <div class="p-4 rounded hero-content">
+                        <h1 class="display-3 fw-bold mb-4 text-shadow">Club Social y Deportivo Maracaná</h1>
+                        <p class="lead fs-4 mb-4 text-shadow">El mejor complejo deportivo para jugadores<br/>y equipos de fútbol en Bogotá</p>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <a th:href="@{/login}" class="btn btn-success btn-lg px-4 py-2 shadow-sm">
+                                <i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión
+                            </a>
+                            <a th:href="@{/registro}" class="btn btn-light btn-lg px-4 py-2 shadow-sm">
+                                <i class="fas fa-user-plus me-2"></i> Registrarse
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Logo a la derecha -->
+                <div class="col-lg-5 d-flex justify-content-center align-items-center">
+                    <div class="logo-container p-4 d-flex justify-content-center align-items-center">
+                        <img src="/images/logo.webp" alt="Logo Club Maracaná" class="img-fluid logo-animation shadow-lg">
                     </div>
                 </div>
             </div>
@@ -218,7 +196,7 @@
     </section>
 
     <!-- Call to Action -->
-    <section class="bg-success text-white py-5">
+    <section class="bg-success text-white py-5" style="border-radius: 15px; margin: 20px auto; overflow: hidden;">
         <div class="container text-center">
             <h2 class="display-5 fw-bold mb-4">¿Listo para jugar?</h2>
             <p class="lead mb-4">Únete a nuestra comunidad y disfruta de las mejores instalaciones deportivas</p>
@@ -229,39 +207,7 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h4 class="mb-4">Club Maracaná</h4>
-                    <p>El mejor complejo deportivo para la práctica del fútbol en todas sus categorías.</p>
-                </div>
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h4 class="mb-4">Enlaces Rápidos</h4>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Inicio</a></li>
-                        <li class="mb-2"><a th:href="@{/login}" class="text-white text-decoration-none">Iniciar Sesión</a></li>
-                        <li class="mb-2"><a th:href="@{/registro}" class="text-white text-decoration-none">Registro</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4">
-                    <h5 class="text-warning">Contacto</h5>
-                    <p>
-                        <i class="fas fa-map-marker-alt"></i> Kilómetro 3.5 Via Suba-Cota, Bogotá<br>
-                        <i class="fas fa-phone"></i> +57 319 614 7520<br>
-                        <i class="fas fa-envelope"></i> clubmaracanafc@gmail.com
-                    </p>
-                </div>
-            </div>
-            <hr class="my-4 bg-light opacity-25">
-            <div class="text-center">
-                <p class="mb-0">&copy; 2025 Club Social y Deportivo Maracaná. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
-    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+    </div>
+</div>
 </body>
 </html>

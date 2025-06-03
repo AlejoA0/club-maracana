@@ -1,0 +1,61 @@
+/* Estilos generales para el layout de la página */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* viewport height */
+}
+
+/* El contenedor principal debe ocupar al menos toda la altura disponible */
+div[th-fragment="main-layout"] {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1 0 auto; /* Esto hace que el contenido principal ocupe todo el espacio disponible */
+    display: flex;
+    flex-direction: column;
+}
+
+.contenido-principal {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilos para el footer */
+footer.footer {
+    flex-shrink: 0; /* Evita que el footer se encoja */
+    width: 100%;
+    background-color: #38A169; /* Actualizado al nuevo color verde */
+    color: white;
+    padding: 2rem 0;
+    margin-top: auto; /* Empuja el footer al fondo */
+}
+
+/* Estilos para el menú de usuario desplegable */
+.dropdown-menu {
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item {
+    padding: 0.5rem 1.5rem;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Clase de ayuda para debugging de layout */
+.debug-border {
+    border: 1px solid red;
+}

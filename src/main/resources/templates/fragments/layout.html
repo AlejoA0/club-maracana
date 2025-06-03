@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <!-- Layout principal con estructura para footer sticky -->
+    <div th:fragment="main-layout(content)" class="d-flex flex-column min-vh-100">
+        <!-- Header con navbar -->
+        <div th:replace="fragments/header :: header"></div>
+        
+        <!-- Contenido principal -->
+        <main class="container my-4 flex-grow-1 d-flex flex-column">
+            <div th:replace="${content}" class="flex-grow-1"></div>
+        </main>
+        
+        <!-- Footer -->
+        <div th:replace="fragments/footer :: footer"></div>
+        
+        <!-- Scripts -->
+        <div th:replace="fragments/scripts :: scripts"></div>
+    </div>
+</body>
+</html>

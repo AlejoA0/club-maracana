@@ -294,23 +294,6 @@ public class AdminController {
         return "redirect:/admin/carga-masiva";
     }
 
-    @PostMapping("/carga-masiva/canchas")
-    public String cargarCanchas(@RequestParam("archivo") MultipartFile archivo, RedirectAttributes redirectAttributes) {
-        if (archivo.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Por favor seleccione un archivo");
-            return "redirect:/admin/carga-masiva";
-        }
-
-        try {
-            csvService.guardarCanchasDesdeCSV(archivo);
-            redirectAttributes.addFlashAttribute("success", "Canchas cargadas exitosamente");
-        } catch (IOException | CsvValidationException e) {
-            redirectAttributes.addFlashAttribute("error", "Error al procesar el archivo: " + e.getMessage());
-        }
-
-        return "redirect:/admin/carga-masiva";
-    }
-
     @GetMapping("/carga-masiva/plantilla-usuarios")
     public ResponseEntity<byte[]> descargarPlantillaUsuarios() {
         String contenido = "numero_documento,tipo_documento,nombres,apellidos,email,password,fecha_nacimiento,eps,telefono,roles\n" +
@@ -330,26 +313,6 @@ public class AdminController {
                 .body(bytes);
     }
     
-    @GetMapping("/carga-masiva/plantilla-canchas")
-    public ResponseEntity<byte[]> descargarPlantillaCanchas() {
-        String contenido = "id,codigo,tipo\n" +
-                "CAN_001,CANCHA_1,FUTBOL_11\n" +
-                "CAN_002,CANCHA_2A,FUTBOL_11\n" +
-                "CAN_003,FUTBOL_8_1,FUTBOL_8\n" +
-                "CAN_004,CANCHA_BABY_1,INFANTIL";
-        
-        byte[] bytes = contenido.getBytes();
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("text/csv"));
-        headers.setContentDispositionFormData("attachment", "plantilla-canchas.csv");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(bytes);
-    }
-
     // Envío de Correos
     @GetMapping("/correos")
     public String mostrarFormularioCorreo(Model model) {

@@ -9,31 +9,29 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-    <div th:replace="fragments/header :: header"></div>
-    
-    <main class="container my-5 text-center">
-        <div class="card shadow">
-            <div class="card-body p-5">
-                <h1 class="display-1 text-danger mb-4"><i class="fas fa-exclamation-triangle"></i> 500</h1>
-                <h2 class="mb-4">Error interno del servidor</h2>
-                <p class="lead mb-4">Lo sentimos, ha ocurrido un error inesperado al procesar su solicitud.</p>
-                
-                <div th:if="${exceptionMessage}" class="alert alert-danger my-4">
-                    <strong>Detalles del error:</strong> <span th:text="${exceptionMessage}"></span>
-                </div>
-                
-                <div class="mt-4">
-                    <a href="/" class="btn btn-primary btn-lg me-2">
-                        <i class="fas fa-home"></i> Volver al inicio
-                    </a>
-                    <button onclick="window.history.back()" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-arrow-left"></i> Volver atrás
-                    </button>
+    <div th:replace="fragments/layout :: main-layout(~{::main})">
+        <main class="container my-5 text-center">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="display-1 text-danger mb-4"><i class="fas fa-exclamation-triangle"></i> 500</h1>
+                    <h2 class="mb-4">Error interno del servidor</h2>
+                    <p class="lead mb-4">Lo sentimos, ha ocurrido un error inesperado al procesar su solicitud.</p>
+                    
+                    <div th:if="${exceptionMessage}" class="alert alert-danger my-4">
+                        <strong>Detalles del error:</strong> <span th:text="${exceptionMessage}"></span>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="/" class="btn btn-primary btn-lg me-2">
+                            <i class="fas fa-home"></i> Volver al inicio
+                        </a>
+                        <button onclick="window.history.back()" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Volver atrás
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
-    
-    <div th:replace="fragments/footer :: footer"></div>
+        </main>
+    </div>
 </body>
-</html> 
+</html>

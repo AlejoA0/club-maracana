@@ -1,19 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club Social y Deportivo Maracaná</title>
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-</head>
-<body>
     <header th:fragment="header">
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2D5A27;">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
             <div class="container">
                 <a class="navbar-brand" th:href="${#authorization.expression('isAuthenticated()') ? '/reservas' : '/'}">
-                    <span class="text-warning fw-bold">Maracaná</span>
+                    <span class="text-white fw-bold">Maracaná</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,10 +38,6 @@
                                 <span sec:authentication="name">Usuario</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" th:href="@{/perfil}">Mi Perfil</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
                                 <li>
                                     <form th:action="@{/logout}" method="post" class="d-inline">
                                         <button type="submit" class="dropdown-item">Cerrar Sesión</button>
@@ -63,5 +50,4 @@
             </div>
         </nav>
     </header>
-</body>
 </html>

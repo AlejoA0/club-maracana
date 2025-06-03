@@ -123,6 +123,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <form id="formEliminarUsuario" method="post">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </form>
                 </div>
@@ -147,5 +148,9 @@
             }
         });
     </script>
+    
+    <!-- Scripts de Bootstrap -->
+    <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>

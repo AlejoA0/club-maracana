@@ -9,21 +9,19 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-    <div th:replace="fragments/header :: header"></div>
-    
-    <main class="container my-5 text-center">
-        <div class="card shadow">
-            <div class="card-body p-5">
-                <h1 class="display-1 text-danger mb-4"><i class="fas fa-exclamation-circle"></i> 404</h1>
-                <h2 class="mb-4">Página no encontrada</h2>
-                <p class="lead mb-4">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
-                <a href="/" class="btn btn-primary btn-lg">
-                    <i class="fas fa-home"></i> Volver al inicio
-                </a>
+    <div th:replace="fragments/layout :: main-layout(~{::main})">
+        <main class="container my-5 text-center">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="display-1 text-danger mb-4"><i class="fas fa-exclamation-circle"></i> 404</h1>
+                    <h2 class="mb-4">Página no encontrada</h2>
+                    <p class="lead mb-4">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
+                    <a href="/" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home"></i> Volver al inicio
+                    </a>
+                </div>
             </div>
-        </div>
-    </main>
-    
-    <div th:replace="fragments/footer :: footer"></div>
+        </main>
+    </div>
 </body>
-</html> 
+</html>
