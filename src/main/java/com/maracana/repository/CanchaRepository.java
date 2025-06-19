@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.maracana.model.Cancha;
+import com.maracana.model.enums.EstadoCancha;
 import com.maracana.model.enums.HoraReserva;
 import com.maracana.model.enums.TipoCancha;
 
@@ -16,9 +17,19 @@ import com.maracana.model.enums.TipoCancha;
 public interface CanchaRepository extends JpaRepository<Cancha, String> {
     List<Cancha> findByTipo(TipoCancha tipo);
     
+    List<Cancha> findByEstado(EstadoCancha estado);
+    
+    List<Cancha> findByTipoAndEstado(TipoCancha tipo, EstadoCancha estado);
+    
     @Query("SELECT c FROM Cancha c WHERE c.id NOT IN " +
            "(SELECT r.cancha.id FROM Reserva r WHERE r.fechaReserva = :fecha AND r.horaReserva = :hora AND r.estadoReserva <> 'CANCELADA')")
     List<Cancha> findCanchasDisponibles(@Param("fecha") LocalDate fecha, @Param("hora") HoraReserva hora);
+    
+    /**
+     * Obtiene los IDs de las canchas que ya están reservadas para una fecha y hora específicas
+     */
+    @Query("SELECT r.cancha.id FROM Reserva r WHERE r.fechaReserva = :fecha AND r.horaReserva = :hora AND r.estadoReserva <> 'CANCELADA'")
+    List<String> findCanchasReservadas(@Param("fecha") LocalDate fecha, @Param("hora") HoraReserva hora);
     
     /**
      * Consulta nativa para obtener canchas disponibles, sin depender de enum HoraReserva

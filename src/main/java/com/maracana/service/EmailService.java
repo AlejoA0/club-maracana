@@ -41,19 +41,21 @@ public class EmailService {
                         .map(Usuario::getEmail)
                         .collect(Collectors.toList());
                 destinatarios.addAll(emails);
-            } else if (emailDTO.getRolDestinatario() != null && !emailDTO.getRolDestinatario().isEmpty()) {
-                // Enviar a usuarios con un rol específico
-                try {
-                    final NombreRol rol = NombreRol.valueOf(emailDTO.getRolDestinatario());
-                    rolRepository.findByNombre(rol).ifPresent(r -> {
-                        List<String> emails = r.getUsuarios().stream()
-                                .map(Usuario::getEmail)
-                                .collect(Collectors.toList());
-                        destinatarios.addAll(emails);
-                    });
-                } catch (IllegalArgumentException e) {
-                    logger.log(Level.WARNING, "Rol inválido: " + emailDTO.getRolDestinatario(), e);
-                    throw new RuntimeException("Rol inválido: " + emailDTO.getRolDestinatario());
+            } else if (emailDTO.getRolesDestinatarios() != null && !emailDTO.getRolesDestinatarios().isEmpty()) {
+                // Enviar a usuarios con roles específicos
+                for (String rolStr : emailDTO.getRolesDestinatarios()) {
+                    try {
+                        final NombreRol rol = NombreRol.valueOf(rolStr);
+                        rolRepository.findByNombre(rol).ifPresent(r -> {
+                            List<String> emails = r.getUsuarios().stream()
+                                    .map(Usuario::getEmail)
+                                    .collect(Collectors.toList());
+                            destinatarios.addAll(emails);
+                        });
+                    } catch (IllegalArgumentException e) {
+                        logger.log(Level.WARNING, "Rol inválido: " + rolStr, e);
+                        throw new RuntimeException("Rol inválido: " + rolStr);
+                    }
                 }
             } else if (emailDTO.getDestinatarios() != null && !emailDTO.getDestinatarios().isEmpty()) {
                 // Usar la lista de destinatarios proporcionada

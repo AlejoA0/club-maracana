@@ -9,6 +9,10 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Servicio de correo que implementa el patrón Strategy
  * Permite seleccionar dinámicamente diferentes estrategias de envío de correos
@@ -60,15 +64,21 @@ public class StrategyEmailService {
         if (emailDTO.isEnviarATodos()) {
             log.debug("Utilizando estrategia de envío a todos los usuarios");
             return allUsersStrategy;
-        } else if (emailDTO.getRolDestinatario() != null && !emailDTO.getRolDestinatario().isEmpty()) {
-            try {
-                NombreRol rol = NombreRol.valueOf(emailDTO.getRolDestinatario());
-                log.debug("Utilizando estrategia de envío por rol: {}", rol);
-                return roleStrategy.withRole(rol);
-            } catch (IllegalArgumentException e) {
-                log.error("Rol inválido: {}", emailDTO.getRolDestinatario(), e);
-                throw new IllegalArgumentException("Rol inválido: " + emailDTO.getRolDestinatario());
+        } else if (emailDTO.getRolesDestinatarios() != null && !emailDTO.getRolesDestinatarios().isEmpty()) {
+            log.debug("Utilizando estrategia de envío por roles: {}", emailDTO.getRolesDestinatarios());
+            List<NombreRol> roles = new ArrayList<>();
+            
+            for (String rolStr : emailDTO.getRolesDestinatarios()) {
+                try {
+                    NombreRol rol = NombreRol.valueOf(rolStr);
+                    roles.add(rol);
+                } catch (IllegalArgumentException e) {
+                    log.error("Rol inválido: {}", rolStr, e);
+                    throw new IllegalArgumentException("Rol inválido: " + rolStr);
+                }
             }
+            
+            return roleStrategy.withRoles(roles);
         } else if (emailDTO.getDestinatarios() != null && !emailDTO.getDestinatarios().isEmpty()) {
             log.debug("Utilizando estrategia de envío a destinatarios específicos");
             return specificUsersStrategy.withDestinatarios(emailDTO.getDestinatarios());

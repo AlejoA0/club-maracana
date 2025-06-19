@@ -29,6 +29,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         
+        <div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
+            <span th:text="${info}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
         <div class="card shadow">
             <div class="card-body">
                 <form th:action="@{/admin/usuarios}" method="get" class="mb-4">
@@ -54,6 +59,17 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <tr th:if="${usuarios.empty}">
+                                <td colspan="6" class="text-center">
+                                    <div class="alert alert-warning mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        No hay usuarios que mostrar. 
+                                        <a th:href="@{/admin/usuarios/nuevo}" class="alert-link">
+                                            <i class="fas fa-plus-circle"></i> Crear el primer usuario
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
                             <tr th:each="usuario : ${usuarios}">
                                 <td th:text="${usuario.numeroDocumento}"></td>
                                 <td th:text="${usuario.nombreCompleto}"></td>
@@ -69,15 +85,16 @@
                                 <td>
                                     <div class="btn-group">
                                         <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.numeroDocumento})}" 
-                                           class="btn btn-sm btn-primary">
+                                           class="btn btn-sm btn-primary" title="Editar usuario">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button class="btn btn-sm btn-danger" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#eliminarUsuarioModal"
-                                                th:attr="data-id=${usuario.numeroDocumento}, data-nombre=${usuario.nombreCompleto}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <a th:href="@{/admin/usuarios/cambiar-estado/{id}(id=${usuario.numeroDocumento})}"
+                                           class="btn btn-sm"
+                                           th:classappend="${usuario.activo ? 'btn-danger' : 'btn-success'}"
+                                           th:title="${usuario.activo ? 'Desactivar usuario' : 'Activar usuario'}"
+                                           onclick="return confirm('¿Estás seguro de que deseas ' + (this.classList.contains('btn-danger') ? 'desactivar' : 'activar') + ' este usuario?');">
+                                            <i class="fas" th:classappend="${usuario.activo ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -108,46 +125,7 @@
         </div>
     </main>
     
-    <!-- Modal Eliminar Usuario -->
-    <div class="modal fade" id="eliminarUsuarioModal" tabindex="-1" aria-labelledby="eliminarUsuarioModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="eliminarUsuarioModalLabel">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>¿Estás seguro de que deseas eliminar al usuario <span id="nombreUsuario"></span>?</p>
-                    <p>Esta acción no se puede deshacer.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form id="formEliminarUsuario" method="post">
-                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <div th:replace="fragments/footer :: footer"></div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const eliminarUsuarioModal = document.getElementById('eliminarUsuarioModal');
-            if (eliminarUsuarioModal) {
-                eliminarUsuarioModal.addEventListener('show.bs.modal', function(event) {
-                    const button = event.relatedTarget;
-                    const id = button.getAttribute('data-id');
-                    const nombre = button.getAttribute('data-nombre');
-                    
-                    document.getElementById('nombreUsuario').textContent = nombre;
-                    document.getElementById('formEliminarUsuario').action = '/admin/usuarios/eliminar/' + id;
-                });
-            }
-        });
-    </script>
     
     <!-- Scripts de Bootstrap -->
     <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>

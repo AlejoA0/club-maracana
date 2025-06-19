@@ -118,6 +118,40 @@
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         }
+
+        function validarDocumentoColombiano(documento) {
+            // Validar que tenga entre 7 y 10 dígitos y sean solo números
+            const re = /^[0-9]{7,10}$/;
+            // Rechazar documentos con todos los dígitos iguales como "1111111"
+            const todosIguales = /^(\d)\1+$/;
+            // Rechazar secuencias simples como "123456789"
+            const secuenciaSimple = /^(123456789|12345678|1234567)$/;
+            
+            return re.test(documento) && !todosIguales.test(documento) && !secuenciaSimple.test(documento);
+        }
+
+        function validarTelefonoColombia(telefono) {
+            // Validar que tenga 10 dígitos y comience con 3
+            const re = /^3[0-9]{9}$/;
+            return re.test(telefono);
+        }
+
+        function validarNombreCompleto(nombre) {
+            // Permitir letras, espacios y caracteres acentuados en español
+            // No permitir números ni caracteres especiales
+            const re = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+            return re.test(nombre);
+        }
+
+        function capitalizarNombre(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.value) {
+                // Capitalizar cada palabra
+                input.value = input.value.toLowerCase().split(' ').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ');
+            }
+        }
         
         function validarFormulario() {
             let esValido = true;
@@ -136,6 +170,11 @@
             const numeroDocumento = document.getElementById('numeroDocumento').value;
             const numeroDocumentoError = document.getElementById('numeroDocumentoError');
             if (!numeroDocumento) {
+                numeroDocumentoError.textContent = 'El número de documento es obligatorio';
+                numeroDocumentoError.style.display = 'block';
+                esValido = false;
+            } else if (!validarDocumentoColombiano(numeroDocumento)) {
+                numeroDocumentoError.textContent = 'El documento debe tener entre 7 y 10 dígitos, solo números y ser válido';
                 numeroDocumentoError.style.display = 'block';
                 esValido = false;
             } else {
@@ -146,20 +185,32 @@
             const nombres = document.getElementById('nombres').value;
             const nombresError = document.getElementById('nombresError');
             if (!nombres) {
+                nombresError.textContent = 'Los nombres son obligatorios';
+                nombresError.style.display = 'block';
+                esValido = false;
+            } else if (!validarNombreCompleto(nombres)) {
+                nombresError.textContent = 'Los nombres deben contener solo letras y espacios';
                 nombresError.style.display = 'block';
                 esValido = false;
             } else {
                 nombresError.style.display = 'none';
+                capitalizarNombre('nombres');
             }
             
             // Validar apellidos
             const apellidos = document.getElementById('apellidos').value;
             const apellidosError = document.getElementById('apellidosError');
             if (!apellidos) {
+                apellidosError.textContent = 'Los apellidos son obligatorios';
+                apellidosError.style.display = 'block';
+                esValido = false;
+            } else if (!validarNombreCompleto(apellidos)) {
+                apellidosError.textContent = 'Los apellidos deben contener solo letras y espacios';
                 apellidosError.style.display = 'block';
                 esValido = false;
             } else {
                 apellidosError.style.display = 'none';
+                capitalizarNombre('apellidos');
             }
             
             // Validar email
@@ -181,9 +232,101 @@
             } else {
                 passwordError.style.display = 'none';
             }
+
+            // Validar teléfono si está presente
+            const telefono = document.getElementById('telefono').value;
+            const telefonoError = document.getElementById('telefonoError');
+            if (telefono && !validarTelefonoColombia(telefono)) {
+                if (!telefonoError) {
+                    // Si no existe el elemento de error, crear uno
+                    const telefonoInput = document.getElementById('telefono');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.id = 'telefonoError';
+                    errorDiv.className = 'text-danger';
+                    errorDiv.textContent = 'El teléfono debe tener 10 dígitos y comenzar con 3';
+                    telefonoInput.parentNode.appendChild(errorDiv);
+                } else {
+                    telefonoError.style.display = 'block';
+                }
+                esValido = false;
+            } else if (telefonoError) {
+                telefonoError.style.display = 'none';
+            }
             
             return esValido;
         }
+
+        // Ejecutar cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Agregar eventos para capitalizar nombres y apellidos al perder el foco
+            document.getElementById('nombres').addEventListener('blur', function() {
+                capitalizarNombre('nombres');
+            });
+            
+            document.getElementById('apellidos').addEventListener('blur', function() {
+                capitalizarNombre('apellidos');
+            });
+
+            // Validación en tiempo real para número de documento
+            document.getElementById('numeroDocumento').addEventListener('input', function() {
+                const numeroDocumento = this.value;
+                const numeroDocumentoError = document.getElementById('numeroDocumentoError');
+                
+                if (numeroDocumento && !validarDocumentoColombiano(numeroDocumento)) {
+                    numeroDocumentoError.textContent = 'El documento debe tener entre 7 y 10 dígitos, solo números y ser válido';
+                    numeroDocumentoError.style.display = 'block';
+                } else {
+                    numeroDocumentoError.style.display = 'none';
+                }
+            });
+
+            // Validación en tiempo real para teléfono
+            document.getElementById('telefono').addEventListener('input', function() {
+                const telefono = this.value;
+                let telefonoError = document.getElementById('telefonoError');
+                
+                if (!telefonoError) {
+                    // Si no existe el elemento de error, crear uno
+                    telefonoError = document.createElement('div');
+                    telefonoError.id = 'telefonoError';
+                    telefonoError.className = 'text-danger';
+                    this.parentNode.appendChild(telefonoError);
+                }
+                
+                if (telefono && !validarTelefonoColombia(telefono)) {
+                    telefonoError.textContent = 'El teléfono debe tener 10 dígitos y comenzar con 3';
+                    telefonoError.style.display = 'block';
+                } else {
+                    telefonoError.style.display = 'none';
+                }
+            });
+
+            // Validación en tiempo real para nombres
+            document.getElementById('nombres').addEventListener('input', function() {
+                const nombres = this.value;
+                const nombresError = document.getElementById('nombresError');
+                
+                if (nombres && !validarNombreCompleto(nombres)) {
+                    nombresError.textContent = 'Los nombres deben contener solo letras y espacios';
+                    nombresError.style.display = 'block';
+                } else {
+                    nombresError.style.display = 'none';
+                }
+            });
+
+            // Validación en tiempo real para apellidos
+            document.getElementById('apellidos').addEventListener('input', function() {
+                const apellidos = this.value;
+                const apellidosError = document.getElementById('apellidosError');
+                
+                if (apellidos && !validarNombreCompleto(apellidos)) {
+                    apellidosError.textContent = 'Los apellidos deben contener solo letras y espacios';
+                    apellidosError.style.display = 'block';
+                } else {
+                    apellidosError.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>

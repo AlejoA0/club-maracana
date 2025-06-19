@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: maracana
+-- Host: localhost    Database: maracana
 -- ------------------------------------------------------
--- Server version	8.0.36
+-- Server version	9.3.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -17,15 +17,16 @@
 
 --
 -- Table structure for table `cancha`
-
+--
 
 DROP TABLE IF EXISTS `cancha`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cancha` (
-  `id` varchar(10) NOT NULL,
-  `codigo` enum('CANCHA_1','CANCHA_10','CANCHA_11','CANCHA_12','CANCHA_13','CANCHA_14','CANCHA_16','CANCHA_17','CANCHA_18','CANCHA_2A','CANCHA_2B','CANCHA_3','CANCHA_4','CANCHA_5','CANCHA_6','CANCHA_7','CANCHA_8','CANCHA_9','CANCHA_BABY_1','CANCHA_BABY_2','FUTBOL_8_1','FUTBOL_8_2','FUTBOL_8_3','FUTBOL_8_4','TRANSICION_1','TRANSICION_2','TRANSICION_3') NOT NULL,
-  `tipo` enum('FUTBOL_11','FUTBOL_8','INFANTIL') NOT NULL,
+  `id` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
+  `codigo` enum('CANCHA_1','CANCHA_10','CANCHA_11','CANCHA_12','CANCHA_13','CANCHA_14','CANCHA_16','CANCHA_17','CANCHA_18','CANCHA_2A','CANCHA_2B','CANCHA_3','CANCHA_4','CANCHA_5','CANCHA_6','CANCHA_7','CANCHA_8','CANCHA_9','CANCHA_BABY_1','CANCHA_BABY_2','FUTBOL_8_1','FUTBOL_8_2','FUTBOL_8_3','FUTBOL_8_4','TRANSICION_1','TRANSICION_2','TRANSICION_3') COLLATE utf8mb4_general_ci NOT NULL,
+  `tipo` enum('FUTBOL_11','FUTBOL_8','INFANTIL') COLLATE utf8mb4_general_ci NOT NULL,
+  `estado` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'DISPONIBLE',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -36,7 +37,7 @@ CREATE TABLE `cancha` (
 
 LOCK TABLES `cancha` WRITE;
 /*!40000 ALTER TABLE `cancha` DISABLE KEYS */;
-INSERT INTO `cancha` VALUES ('C1','CANCHA_1','FUTBOL_11'),('C10','CANCHA_10','FUTBOL_11'),('C11','CANCHA_11','FUTBOL_11'),('C12','CANCHA_12','FUTBOL_11'),('C13','CANCHA_13','FUTBOL_11'),('C14','CANCHA_14','FUTBOL_11'),('C16','CANCHA_16','FUTBOL_11'),('C17','CANCHA_17','FUTBOL_11'),('C18','CANCHA_18','FUTBOL_11'),('C2A','CANCHA_2A','INFANTIL'),('C2B','CANCHA_2B','INFANTIL'),('C3','CANCHA_3','FUTBOL_11'),('C4','CANCHA_4','FUTBOL_11'),('C5','CANCHA_5','FUTBOL_11'),('C6','CANCHA_6','FUTBOL_11'),('C7','CANCHA_7','FUTBOL_11'),('C8','CANCHA_8','FUTBOL_11'),('C9','CANCHA_9','FUTBOL_11'),('CAN_29','CANCHA_11','FUTBOL_11'),('CB1','CANCHA_BABY_1','INFANTIL'),('CB2','CANCHA_BABY_2','INFANTIL'),('F8_1','FUTBOL_8_1','FUTBOL_8'),('F8_2','FUTBOL_8_2','FUTBOL_8'),('F8_3','FUTBOL_8_3','FUTBOL_8'),('F8_4','FUTBOL_8_4','FUTBOL_8'),('TR1','TRANSICION_1','INFANTIL'),('TR2','TRANSICION_2','INFANTIL'),('TR3','TRANSICION_3','INFANTIL');
+INSERT INTO `cancha` VALUES ('C1','CANCHA_1','FUTBOL_11','DISPONIBLE'),('C10','CANCHA_10','FUTBOL_11','DISPONIBLE'),('C11','CANCHA_11','FUTBOL_11','EN_MANTENIMIENTO'),('C12','CANCHA_12','FUTBOL_11','DISPONIBLE'),('C13','CANCHA_13','FUTBOL_11','FUERA_DE_SERVICIO'),('C14','CANCHA_14','FUTBOL_11','DISPONIBLE'),('C16','CANCHA_16','FUTBOL_11','DISPONIBLE'),('C17','CANCHA_17','FUTBOL_11','DISPONIBLE'),('C18','CANCHA_18','FUTBOL_11','DISPONIBLE'),('C2A','CANCHA_2A','INFANTIL','DISPONIBLE'),('C2B','CANCHA_2B','INFANTIL','DISPONIBLE'),('C3','CANCHA_3','FUTBOL_11','DISPONIBLE'),('C4','CANCHA_4','FUTBOL_11','DISPONIBLE'),('C5','CANCHA_5','FUTBOL_11','DISPONIBLE'),('C6','CANCHA_6','FUTBOL_11','DISPONIBLE'),('C7','CANCHA_7','FUTBOL_11','DISPONIBLE'),('C8','CANCHA_8','FUTBOL_11','DISPONIBLE'),('C9','CANCHA_9','FUTBOL_11','DISPONIBLE'),('CAN_29','CANCHA_11','FUTBOL_11','DISPONIBLE'),('CB1','CANCHA_BABY_1','INFANTIL','DISPONIBLE'),('CB2','CANCHA_BABY_2','INFANTIL','DISPONIBLE'),('F8_1','FUTBOL_8_1','FUTBOL_8','DISPONIBLE'),('F8_2','FUTBOL_8_2','FUTBOL_8','DISPONIBLE'),('F8_3','FUTBOL_8_3','FUTBOL_8','DISPONIBLE'),('F8_4','FUTBOL_8_4','FUTBOL_8','DISPONIBLE'),('TR1','TRANSICION_1','INFANTIL','DISPONIBLE'),('TR2','TRANSICION_2','INFANTIL','DISPONIBLE'),('TR3','TRANSICION_3','INFANTIL','DISPONIBLE');
 /*!40000 ALTER TABLE `cancha` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -49,10 +50,10 @@ DROP TABLE IF EXISTS `equipo`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `equipo` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  `categoria` enum('FUTBOL_11','FUTBOL_8','INFANTIL') NOT NULL,
+  `nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `categoria` enum('FUTBOL_11','FUTBOL_8','INFANTIL') COLLATE utf8mb4_general_ci NOT NULL,
   `logo` mediumblob,
-  `director_tecnico_id` varchar(20) NOT NULL,
+  `director_tecnico_id` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`),
   KEY `director_tecnico_id` (`director_tecnico_id`),
@@ -90,6 +91,37 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Table structure for table `flyway_schema_history_backup`
+--
+
+DROP TABLE IF EXISTS `flyway_schema_history_backup`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flyway_schema_history_backup` (
+  `installed_rank` int NOT NULL,
+  `version` varchar(50) DEFAULT NULL,
+  `description` varchar(200) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `script` varchar(1000) NOT NULL,
+  `checksum` int DEFAULT NULL,
+  `installed_by` varchar(100) NOT NULL,
+  `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `execution_time` int NOT NULL,
+  `success` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flyway_schema_history_backup`
+--
+
+LOCK TABLES `flyway_schema_history_backup` WRITE;
+/*!40000 ALTER TABLE `flyway_schema_history_backup` DISABLE KEYS */;
+INSERT INTO `flyway_schema_history_backup` VALUES (1,'0','<< Flyway Baseline >>','BASELINE','<< Flyway Baseline >>',NULL,'root','2025-06-16 20:15:40',0,1),(2,'1.0','baseline','SQL','V1.0__baseline.sql',-1462144239,'root','2025-06-16 20:15:40',10,1),(3,'1.1','set initial schema','SQL','V1.1__set_initial_schema.sql',-1480258100,'root','2025-06-16 20:15:40',10,1),(4,'1.2','add notificaciones','SQL','V1.2__add_notificaciones.sql',1556556053,'root','2025-06-16 20:15:41',788,1),(5,'1.3','add cancha estado','SQL','V1.3__add_cancha_estado.sql',602591179,'root','2025-06-16 20:15:41',85,1),(6,'1.4','fix notificacion table','SQL','V1.4__fix_notificacion_table.sql',-1833633568,'root','2025-06-16 20:35:24',116,1),(7,'1.5','update notificacion table','SQL','V1.5__update_notificacion_table.sql',-751209461,'root','2025-06-18 02:47:32',944,0);
+/*!40000 ALTER TABLE `flyway_schema_history_backup` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `jugador`
 --
 
@@ -98,8 +130,8 @@ DROP TABLE IF EXISTS `jugador`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `jugador` (
   `id_equipo` int DEFAULT NULL,
-  `numero_documento` varchar(20) NOT NULL,
-  `categoria` enum('FUTBOL_11','FUTBOL_8','INFANTIL') NOT NULL,
+  `numero_documento` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `categoria` enum('FUTBOL_11','FUTBOL_8','INFANTIL') COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`numero_documento`),
   KEY `id_equipo` (`id_equipo`),
   CONSTRAINT `jugador_ibfk_1` FOREIGN KEY (`id_equipo`) REFERENCES `equipo` (`id`) ON DELETE SET NULL,
@@ -117,6 +149,41 @@ LOCK TABLES `jugador` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `notificacion`
+--
+
+DROP TABLE IF EXISTS `notificacion`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notificacion` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `mensaje` varchar(255) NOT NULL,
+  `tipo` enum('RESERVA_NUEVA','RESERVA_CANCELADA','USUARIO_NUEVO','SISTEMA_INFO','CANCHA_ESTADO_CAMBIO','RESERVA_CANCELADA_ADMIN') NOT NULL,
+  `fecha_creacion` datetime(6) NOT NULL,
+  `leida` tinyint(1) NOT NULL DEFAULT '0',
+  `referencia_id` int DEFAULT NULL,
+  `referencia_tipo` varchar(255) DEFAULT NULL,
+  `tipo_destinatario` enum('ADMIN','USUARIO') NOT NULL DEFAULT 'ADMIN',
+  `destinatario_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_notificacion_leida` (`leida`),
+  KEY `idx_notificacion_fecha` (`fecha_creacion`),
+  KEY `idx_notificacion_tipo_destinatario` (`tipo_destinatario`),
+  KEY `idx_notificacion_destinatario_id` (`destinatario_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notificacion`
+--
+
+LOCK TABLES `notificacion` WRITE;
+/*!40000 ALTER TABLE `notificacion` DISABLE KEYS */;
+INSERT INTO `notificacion` VALUES (1,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-04-12 a las 07:00:00','RESERVA_CANCELADA','2025-06-17 12:00:24.000000',0,4,'RESERVA','ADMIN',NULL),(2,'Nueva reserva creada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-20 a las 09:00:00','RESERVA_NUEVA','2025-06-17 14:34:54.000000',0,15,'RESERVA','ADMIN',NULL),(3,'Un administrador ha cancelado tu reserva para la cancha C1 el día 2025-06-19 a las 09:00:00','RESERVA_CANCELADA','2025-06-18 05:35:06.113896',0,13,'RESERVA','ADMIN',NULL),(4,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-19 a las 09:00:00','RESERVA_CANCELADA','2025-06-18 05:35:06.294783',0,13,'RESERVA','ADMIN',NULL),(5,'Un administrador ha cancelado tu reserva para la cancha C1 el día 2025-06-20 a las 07:00:00','RESERVA_CANCELADA','2025-06-18 05:35:12.777069',0,14,'RESERVA','ADMIN',NULL),(6,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-20 a las 07:00:00','RESERVA_CANCELADA','2025-06-18 05:35:12.864015',0,14,'RESERVA','ADMIN',NULL);
+/*!40000 ALTER TABLE `notificacion` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `pago`
 --
 
@@ -127,12 +194,12 @@ CREATE TABLE `pago` (
   `id` int NOT NULL AUTO_INCREMENT,
   `reserva_id` int NOT NULL,
   `monto` decimal(10,2) NOT NULL,
-  `metodo_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA') NOT NULL,
+  `metodo_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA') COLLATE utf8mb4_general_ci NOT NULL,
   `fecha_pago` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `reserva_id` (`reserva_id`),
   CONSTRAINT `pago_ibfk_1` FOREIGN KEY (`reserva_id`) REFERENCES `reserva` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -141,6 +208,7 @@ CREATE TABLE `pago` (
 
 LOCK TABLES `pago` WRITE;
 /*!40000 ALTER TABLE `pago` DISABLE KEYS */;
+INSERT INTO `pago` VALUES (1,13,160000.00,'TARJETA','2025-06-16 12:43:34'),(2,14,160000.00,'TARJETA','2025-06-16 12:49:24'),(3,15,160000.00,'EFECTIVO','2025-06-17 14:34:54');
 /*!40000 ALTER TABLE `pago` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -154,16 +222,16 @@ DROP TABLE IF EXISTS `reserva`;
 CREATE TABLE `reserva` (
   `id` int NOT NULL AUTO_INCREMENT,
   `fecha_reserva` date NOT NULL,
-  `hora_reserva` varchar(255) NOT NULL,
-  `estado_reserva` enum('CANCELADA','CONFIRMADA','PENDIENTE') NOT NULL,
-  `cancha_id` varchar(10) NOT NULL,
-  `jugador_id` varchar(20) NOT NULL,
+  `hora_reserva` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `estado_reserva` enum('CANCELADA','CONFIRMADA','PENDIENTE','VENCIDA') COLLATE utf8mb4_general_ci NOT NULL,
+  `cancha_id` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
+  `jugador_id` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `cancha_id` (`cancha_id`),
   KEY `jugador_id` (`jugador_id`),
   CONSTRAINT `reserva_ibfk_1` FOREIGN KEY (`cancha_id`) REFERENCES `cancha` (`id`),
   CONSTRAINT `reserva_ibfk_2` FOREIGN KEY (`jugador_id`) REFERENCES `usuario` (`numero_documento`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -172,7 +240,7 @@ CREATE TABLE `reserva` (
 
 LOCK TABLES `reserva` WRITE;
 /*!40000 ALTER TABLE `reserva` DISABLE KEYS */;
-INSERT INTO `reserva` VALUES (1,'2025-04-12','07:00:00','CANCELADA','C1','1016594699'),(2,'2025-04-12','07:00:00','CANCELADA','C10','1016594699'),(3,'2025-04-12','07:00:00','CANCELADA','C11','1016594699'),(4,'2025-04-12','07:00:00','CONFIRMADA','C1','1016594699'),(5,'2025-04-12','15:00:00','CONFIRMADA','F8_2','5696448'),(11,'2025-04-12','07:00:00','CANCELADA','C9','101659469'),(12,'2025-04-25','09:00:00','CONFIRMADA','C16','101659469');
+INSERT INTO `reserva` VALUES (1,'2025-04-12','07:00:00','CANCELADA','C1','1016594699'),(2,'2025-04-12','07:00:00','CANCELADA','C10','1016594699'),(3,'2025-04-12','07:00:00','CANCELADA','C11','1016594699'),(4,'2025-04-12','07:00:00','CANCELADA','C1','1016594699'),(5,'2025-04-12','15:00:00','VENCIDA','F8_2','5696448'),(11,'2025-04-12','07:00:00','CANCELADA','C9','101659469'),(12,'2025-04-25','09:00:00','VENCIDA','C16','101659469'),(13,'2025-06-19','09:00:00','CANCELADA','C1','1016594699'),(14,'2025-06-20','07:00:00','CANCELADA','C1','1016594699'),(15,'2025-06-20','09:00:00','CONFIRMADA','C1','1016594699');
 /*!40000 ALTER TABLE `reserva` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -185,7 +253,7 @@ DROP TABLE IF EXISTS `rol`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `rol` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` enum('ROLE_ADMIN','ROLE_JUGADOR','ROLE_DIRECTOR_TECNICO') NOT NULL,
+  `nombre` enum('ROLE_ADMIN','ROLE_JUGADOR','ROLE_DIRECTOR_TECNICO') COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -211,8 +279,8 @@ DROP TABLE IF EXISTS `solicitud_union`;
 CREATE TABLE `solicitud_union` (
   `id` int NOT NULL AUTO_INCREMENT,
   `equipo_id` int NOT NULL,
-  `jugador_id` varchar(20) NOT NULL,
-  `estado` enum('PENDIENTE','APROBADA','RECHAZADA') DEFAULT 'PENDIENTE',
+  `jugador_id` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `estado` enum('PENDIENTE','APROBADA','RECHAZADA') COLLATE utf8mb4_general_ci DEFAULT 'PENDIENTE',
   `fecha_solicitud` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_solicitud` (`equipo_id`,`jugador_id`),
@@ -240,17 +308,18 @@ DROP TABLE IF EXISTS `usuario`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuario` (
-  `numero_documento` varchar(20) NOT NULL,
-  `tipo_documento` enum('CEDULA_CIUDADANIA','CEDULA_EXTRANJERIA','PERMISO_PROTECCION_TEMPORAL','REGISTRO_CIVIL','TARJETA_IDENTIDAD') NOT NULL,
-  `nombres` varchar(100) NOT NULL,
-  `apellidos` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `numero_documento` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `tipo_documento` enum('CEDULA_CIUDADANIA','CEDULA_EXTRANJERIA','PERMISO_PROTECCION_TEMPORAL','REGISTRO_CIVIL','TARJETA_IDENTIDAD') COLLATE utf8mb4_general_ci NOT NULL,
+  `nombres` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `apellidos` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `fecha_nacimiento` date DEFAULT NULL,
-  `eps` varchar(100) DEFAULT NULL,
-  `telefono` varchar(20) DEFAULT NULL,
+  `eps` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `telefono` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `puede_jugar` bit(1) DEFAULT b'0',
   `activo` bit(1) DEFAULT b'1',
+  `ultima_actualizacion_nombre` date DEFAULT NULL,
   PRIMARY KEY (`numero_documento`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -262,7 +331,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES ('1000000001','CEDULA_CIUDADANIA','Administrador','Sistema','admin@maracana.com','admin123',NULL,NULL,NULL,_binary '\0',_binary ' '),('101659469','REGISTRO_CIVIL','ALEJANDRO','ACERO','alpovedaac7d@gmail.com','alejo123','2005-07-05','Sanitas','3194785205',_binary '\0',_binary ' '),('1016594699','CEDULA_CIUDADANIA','Alejandro','Poveda','alejandropovedaacero@gmail.com','alejo123','2005-07-05','Sanitas','3196147520',_binary '\0',_binary ' '),('1019023278','CEDULA_CIUDADANIA','Catherine','Acero','catherineacerog@gmail.com','cathe123','1987-03-23','Sanitas','3195277425',_binary '\0',_binary ' '),('5696448','PERMISO_PROTECCION_TEMPORAL','Anni','Alvins','annnjjk1@gmail.com','anni123','2006-01-24','Salud Total','3125037798',_binary '\0',_binary ' ');
+INSERT INTO `usuario` VALUES ('1000000001','CEDULA_CIUDADANIA','Administrador','Sistema','admin@maracana.com','admin123',NULL,NULL,NULL,_binary '\0',_binary '',NULL),('101659469','REGISTRO_CIVIL','ALEJANDRO','ACERO','alpovedaac7d@gmail.com','alejo123','2005-07-05','Sanitas','3194785205',_binary '\0',_binary '',NULL),('1016594699','CEDULA_CIUDADANIA','Alejandro','Poveda Acero','alejandropovedaacero@gmail.com','alejo123','2005-07-05','Sanitas','3196147520',_binary '\0',_binary '','2025-06-16'),('1019023278','CEDULA_CIUDADANIA','Catherine','Acero','catherineacerog@gmail.com','cathe123','1987-03-23','Sanitas','3195277425',_binary '\0',_binary '\0',NULL),('312','CEDULA_CIUDADANIA','Daniel','Gonzalez','danielcorreo@gmail.com','daniel123','2005-07-05','Sanitas','90312',_binary '\0',_binary '',NULL),('5696448','PERMISO_PROTECCION_TEMPORAL','Anni','Alvins','annnjjk1@gmail.com','anni123','2006-01-24','Salud Total','3125037798',_binary '\0',_binary '',NULL);
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -301,7 +370,7 @@ DROP TABLE IF EXISTS `usuario_rol`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuario_rol` (
-  `usuario_id` varchar(20) NOT NULL,
+  `usuario_id` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
   `rol_id` int NOT NULL,
   PRIMARY KEY (`usuario_id`,`rol_id`),
   KEY `rol_id` (`rol_id`),
@@ -316,7 +385,7 @@ CREATE TABLE `usuario_rol` (
 
 LOCK TABLES `usuario_rol` WRITE;
 /*!40000 ALTER TABLE `usuario_rol` DISABLE KEYS */;
-INSERT INTO `usuario_rol` VALUES ('1000000001',1),('101659469',2),('1016594699',2),('1019023278',2),('5696448',2);
+INSERT INTO `usuario_rol` VALUES ('1000000001',1),('101659469',2),('1016594699',2),('1019023278',2),('312',2),('5696448',2);
 /*!40000 ALTER TABLE `usuario_rol` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -454,4 +523,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-11  0:57:47
+-- Dump completed on 2025-06-18 19:55:51

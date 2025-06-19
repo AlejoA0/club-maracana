@@ -42,6 +42,11 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
             @Param("fecha") LocalDate fecha,
             @Param("hora") HoraReserva hora);
     
+    /**
+     * Encuentra reservas con fecha anterior a la especificada y con los estados indicados
+     */
+    List<Reserva> findByFechaReservaBeforeAndEstadoReservaIn(LocalDate fecha, List<EstadoReserva> estados);
+    
     @Query("SELECT r FROM Reserva r WHERE " +
            "(:fecha IS NULL OR r.fechaReserva = :fecha) AND " +
            "(:estado IS NULL OR r.estadoReserva = :estado) AND " +
@@ -103,4 +108,13 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
      * @return la última reserva creada o null si no hay reservas
      */
     Optional<Reserva> findTopByUsuarioOrderByIdDesc(Usuario usuario);
+
+    @Query("SELECT r FROM Reserva r WHERE " +
+           "(:fecha IS NULL OR r.fechaReserva = :fecha) AND " +
+           "r.estadoReserva <> 'CANCELADA' AND " +
+           "(:canchaId IS NULL OR r.cancha.id = :canchaId)")
+    Page<Reserva> buscarReservasNoRemovidas(
+            @Param("fecha") LocalDate fecha,
+            @Param("canchaId") String canchaId,
+            Pageable pageable);
 }

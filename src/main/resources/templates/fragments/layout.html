@@ -23,7 +23,9 @@
         <div th:replace="fragments/footer :: footer"></div>
         
         <!-- Scripts -->
-        <div th:replace="fragments/scripts :: scripts"></div>
+        <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+        <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+        <script th:src="@{/js/scripts.js}"></script>
     </div>
 </body>
 </html>

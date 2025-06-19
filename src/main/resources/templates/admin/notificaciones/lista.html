@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Notificaciones - Club Social y Deportivo Maracaná')"></head>
+<body>
+    <div th:replace="fragments/layout :: main-layout(~{::div.contenido-principal})">
+        <div class="contenido-principal">
+        
+        <main class="container my-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-success">Notificaciones</h2>
+                <div>
+                    <button id="marcarTodasLeidas" class="btn btn-outline-success">
+                        <i class="fas fa-check-double"></i> Marcar todas como leídas
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="alert alert-info" th:if="${notificaciones.empty}">
+                        <i class="fas fa-info-circle"></i> No hay notificaciones para mostrar.
+                    </div>
+                    
+                    <div th:if="${!notificaciones.empty}" class="list-group notification-list">
+                        <div th:each="notificacion : ${notificaciones}" 
+                             th:class="'list-group-item list-group-item-action ' + (${notificacion.leida} ? '' : 'list-group-item-light unread')"
+                             th:data-id="${notificacion.id}">
+                             
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-1">
+                                    <span th:if="${notificacion.tipo.name() == 'RESERVA_NUEVA'}" class="badge bg-success">Reserva Nueva</span>
+                                    <span th:if="${notificacion.tipo.name() == 'RESERVA_CANCELADA'}" class="badge bg-danger">Reserva Cancelada</span>
+                                    <span th:if="${notificacion.tipo.name() == 'USUARIO_NUEVO'}" class="badge bg-primary">Usuario Nuevo</span>
+                                    <span th:if="${notificacion.tipo.name() == 'SISTEMA_INFO'}" class="badge bg-info">Info Sistema</span>
+                                </h5>
+                                <small th:text="${#temporals.format(notificacion.fechaCreacion, 'dd/MM/yyyy HH:mm')}">Fecha</small>
+                            </div>
+                            <p class="mb-1" th:text="${notificacion.mensaje}">Mensaje de notificación</p>
+                            <small>
+                                <span th:if="${!notificacion.leida}" class="text-primary">
+                                    <i class="fas fa-circle"></i> No leído
+                                </span>
+                                <span th:if="${notificacion.leida}" class="text-muted">
+                                    <i class="fas fa-check"></i> Leído
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Paginación -->
+                    <div th:if="${notificaciones.totalPages > 1}" class="mt-4">
+                        <nav aria-label="Pagination">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${notificaciones.number == 0 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/admin/notificaciones(pagina=${notificaciones.number - 1})}">&laquo;</a>
+                                </li>
+                                
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, notificaciones.totalPages - 1)}"
+                                    th:classappend="${i == notificaciones.number ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/admin/notificaciones(pagina=${i})}" 
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                
+                                <li class="page-item" th:classappend="${notificaciones.number + 1 == notificaciones.totalPages ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/admin/notificaciones(pagina=${notificaciones.number + 1})}">&raquo;</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                // Marcar una notificación individual como leída al hacer clic
+                document.querySelectorAll('.notification-list .list-group-item.unread').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const notificacionId = this.getAttribute('data-id');
+                        marcarComoLeida(notificacionId, this);
+                    });
+                });
+                
+                // Marcar todas las notificaciones como leídas
+                document.getElementById('marcarTodasLeidas').addEventListener('click', function() {
+                    fetch('/admin/notificaciones/marcar-todas-leidas', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            document.querySelectorAll('.notification-list .list-group-item.unread').forEach(item => {
+                                item.classList.remove('list-group-item-light', 'unread');
+                                const statusText = item.querySelector('small');
+                                if (statusText) {
+                                    statusText.innerHTML = '<i class="fas fa-check"></i> Leído';
+                                    statusText.classList.remove('text-primary');
+                                    statusText.classList.add('text-muted');
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                // Función para marcar una notificación como leída
+                function marcarComoLeida(id, elemento) {
+                    fetch(`/admin/notificaciones/${id}/marcar-leida`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            elemento.classList.remove('list-group-item-light', 'unread');
+                            const statusText = elemento.querySelector('small');
+                            if (statusText) {
+                                statusText.innerHTML = '<i class="fas fa-check"></i> Leído';
+                                statusText.classList.remove('text-primary');
+                                statusText.classList.add('text-muted');
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+        
+        </div>
+    </div>
+</body>
+</html>

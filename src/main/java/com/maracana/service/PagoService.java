@@ -4,9 +4,11 @@ import com.maracana.dto.PagoDTO;
 import com.maracana.model.Pago;
 import com.maracana.model.Reserva;
 import com.maracana.repository.PagoRepository;
+import com.maracana.repository.ReservaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -19,7 +21,7 @@ import java.util.Optional;
 public class PagoService {
 
     private final PagoRepository pagoRepository;
-    private final ReservaService reservaService;
+    private final ReservaRepository reservaRepository;
     
     // Valor fijo para todas las reservas: 160.000 pesos colombianos
     private static final BigDecimal MONTO_RESERVA = new BigDecimal("160000.00");
@@ -37,10 +39,10 @@ public class PagoService {
      * @param pagoDTO información del pago a procesar
      * @return mensaje de éxito o error
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public String procesarPago(PagoDTO pagoDTO) {
         try {
-            Optional<Reserva> reservaOpt = reservaService.buscarPorId(pagoDTO.getReservaId());
+            Optional<Reserva> reservaOpt = reservaRepository.findById(pagoDTO.getReservaId());
             if (reservaOpt.isEmpty()) {
                 return "Error: No se encontró la reserva para realizar el pago";
             }
@@ -64,17 +66,19 @@ public class PagoService {
             pago.setMetodoPago(pagoDTO.getMetodoPago());
             pago.setFechaPago(LocalDateTime.now());
             
-            pagoRepository.save(pago);
+            // Guardar el pago primero
+            Pago pagoGuardado = pagoRepository.save(pago);
             
-            // Actualizar la referencia en la reserva
-            reserva.setPago(pago);
+            // Actualizar la referencia en la reserva y guardar
+            reserva.setPago(pagoGuardado);
+            reservaRepository.save(reserva);
             
             log.info("Pago procesado correctamente para la reserva ID: {}", reserva.getId());
             return "Pago procesado correctamente. Su reserva ha sido confirmada.";
             
         } catch (Exception e) {
             log.error("Error al procesar el pago: {}", e.getMessage(), e);
-            return "Error al procesar el pago: " + e.getMessage();
+            throw new RuntimeException("Error al procesar el pago: " + e.getMessage(), e);
         }
     }
 }

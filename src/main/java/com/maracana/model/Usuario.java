@@ -57,6 +57,9 @@ public class Usuario {
     @Column(name = "activo")
     private Boolean activo = true;
 
+    @Column(name = "ultima_actualizacion_nombre")
+    private LocalDate ultimaActualizacionNombre;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuario_rol",

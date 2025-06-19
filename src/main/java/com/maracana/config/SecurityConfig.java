@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Desactivar CSRF para simplificar
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/error").permitAll()
-                        .requestMatchers("/", "/index", "/registro", "/login").permitAll()
+                        .requestMatchers("/", "/index", "/registro", "/login", "/usuario-inactivo").permitAll()
                         .requestMatchers("/admin/**", "/debug/**").hasRole("ADMIN")
                         .requestMatchers("/equipos/**").hasAnyRole("JUGADOR", "DIRECTOR_TECNICO", "ADMIN")
                         .requestMatchers("/reservas/**").hasAnyRole("JUGADOR", "ADMIN", "DIRECTOR_TECNICO")
@@ -40,6 +40,17 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .successHandler(customAuthenticationSuccessHandler())
+                        .failureHandler((request, response, exception) -> {
+                            // Si es un usuario inactivo, redirigir a la página de usuario inactivo
+                            if (exception instanceof org.springframework.security.authentication.DisabledException 
+                                    || exception instanceof org.springframework.security.authentication.LockedException
+                                    || exception.getMessage().contains("disabled")) {
+                                response.sendRedirect("/usuario-inactivo");
+                            } else {
+                                // Para otros errores, redirigir a la página de login con el error
+                                response.sendRedirect("/login?error=true");
+                            }
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout

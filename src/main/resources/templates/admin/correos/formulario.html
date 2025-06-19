@@ -7,98 +7,171 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .role-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .role-checkbox {
+            display: none;
+        }
+        
+        .role-label {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .role-checkbox:checked + .role-label {
+            background-color: #198754;
+            color: white;
+            border-color: #198754;
+        }
+        
+        .role-label:hover {
+            border-color: #198754;
+        }
+        
+        .role-badge {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+        
+        .roles-selected {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        
+        .role-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background-color: #198754;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
 <body>
-    <div th:replace="fragments/header :: header"></div>
-    
-    <main class="container my-5">
-        <h2 class="text-success mb-4">Envío de Correos</h2>
-        
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div th:replace="fragments/layout :: main-layout(~{::div.contenido-principal})">
+        <div class="contenido-principal">
+            <main class="container my-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-success">Envío de Correos</h2>
+                    <a th:href="@{/admin}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+                
+                <div class="alert alert-success" th:if="${success != null}" th:text="${success}">
+                    Correo enviado con éxito!
+                </div>
+                <div class="alert alert-danger" th:if="${error != null}" th:text="${error}">
+                    Error al enviar el correo
+                </div>
+                
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-envelope"></i> Nuevo Correo
+                    </div>
+                    <div class="card-body">
+                        <form id="emailForm" th:action="@{/admin/correos/enviar}" method="post" th:object="${emailDTO}" onsubmit="prepararEnvio(event)">
+                            <div class="mb-3">
+                                <label for="asunto" class="form-label">Asunto</label>
+                                <input type="text" class="form-control" id="asunto" th:field="*{asunto}" required>
+                                <div class="text-danger" th:if="${#fields.hasErrors('asunto')}" th:errors="*{asunto}"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cuerpo" class="form-label">Contenido</label>
+                                <textarea class="form-control" id="cuerpo" th:field="*{cuerpo}" rows="10" required></textarea>
+                                <div class="text-danger" th:if="${#fields.hasErrors('cuerpo')}" th:errors="*{cuerpo}"></div>
+                                <small class="text-muted">Puede utilizar HTML para dar formato al correo.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Destinatarios</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="tipoDestinatario" id="enviarATodos" value="todos" checked
+                                           onchange="toggleDestinatarios()">
+                                    <label class="form-check-label" for="enviarATodos">
+                                        Enviar a todos los usuarios
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="tipoDestinatario" id="enviarPorRol" value="rol"
+                                           onchange="toggleDestinatarios()">
+                                    <label class="form-check-label" for="enviarPorRol">
+                                        Enviar por rol
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tipoDestinatario" id="enviarPersonalizado" value="personalizado"
+                                           onchange="toggleDestinatarios()">
+                                    <label class="form-check-label" for="enviarPersonalizado">
+                                        Enviar a destinatarios específicos
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="rolSelector" class="mb-3" style="display: none;">
+                                <label class="form-label">Seleccionar Roles</label>
+                                <div class="alert alert-info">
+                                    <small><i class="fas fa-info-circle"></i> Haga clic en los roles para seleccionarlos. Puede elegir varios roles.</small>
+                                </div>
+                                <div class="role-selector">
+                                    <div th:each="rol : ${roles}" class="role-item">
+                                        <input type="checkbox" th:id="${'role-' + rol.name()}" 
+                                               th:value="${rol.name()}" 
+                                               class="role-checkbox">
+                                        <label th:for="${'role-' + rol.name()}" class="role-label" 
+                                               th:text="${rol.name().replace('ROLE_', '')}">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="selectedRolesContainer" class="mt-3">
+                                    <p><strong>Roles seleccionados:</strong></p>
+                                    <div id="selectedRoles" class="roles-selected">
+                                        <span class="text-muted">Ningún rol seleccionado</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="destinatariosPersonalizados" class="mb-3" style="display: none;">
+                                <label for="destinatariosText" class="form-label">Correos Electrónicos (uno por línea)</label>
+                                <textarea id="destinatariosText" class="form-control" rows="5" placeholder="ejemplo@correo.com"></textarea>
+                                <small class="text-muted">Los correos se agregarán a la lista de destinatarios.</small>
+                            </div>
+                            
+                            <!-- Campos ocultos para envío -->
+                            <input type="hidden" id="enviarATodosHidden" th:field="*{enviarATodos}">
+                            <div id="destinatariosHidden"></div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane"></i> Enviar Correo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
         </div>
-        
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">Formulario de Envío</h4>
-            </div>
-            <div class="card-body">
-                <form th:action="@{/admin/correos/enviar}" th:object="${emailDTO}" method="post" id="emailForm">
-                    <div class="mb-3">
-                        <label for="asunto" class="form-label">Asunto</label>
-                        <input type="text" id="asunto" th:field="*{asunto}" class="form-control" required>
-                        <div class="text-danger" th:if="${#fields.hasErrors('asunto')}" th:errors="*{asunto}"></div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="cuerpo" class="form-label">Cuerpo del Mensaje (HTML permitido)</label>
-                        <textarea id="cuerpo" th:field="*{cuerpo}" class="form-control" rows="10" required></textarea>
-                        <div class="text-danger" th:if="${#fields.hasErrors('cuerpo')}" th:errors="*{cuerpo}"></div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Destinatarios</label>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="tipoDestinatario" id="enviarATodos" value="todos" checked
-                                   onchange="toggleDestinatarios()">
-                            <label class="form-check-label" for="enviarATodos">
-                                Enviar a todos los usuarios
-                            </label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="tipoDestinatario" id="enviarPorRol" value="rol"
-                                   onchange="toggleDestinatarios()">
-                            <label class="form-check-label" for="enviarPorRol">
-                                Enviar por rol
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="tipoDestinatario" id="enviarPersonalizado" value="personalizado"
-                                   onchange="toggleDestinatarios()">
-                            <label class="form-check-label" for="enviarPersonalizado">
-                                Enviar a destinatarios específicos
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div id="rolSelector" class="mb-3" style="display: none;">
-                        <label for="rolDestinatario" class="form-label">Seleccionar Rol</label>
-                        <select id="rolDestinatario" th:field="*{rolDestinatario}" class="form-select">
-                            <option value="">Seleccione un rol...</option>
-                            <option th:each="rol : ${roles}" th:value="${rol.name()}" th:text="${rol.name().replace('ROLE_', '')}"></option>
-                        </select>
-                    </div>
-                    
-                    <div id="destinatariosPersonalizados" class="mb-3" style="display: none;">
-                        <label for="destinatariosText" class="form-label">Correos Electrónicos (uno por línea)</label>
-                        <textarea id="destinatariosText" class="form-control" rows="5" placeholder="ejemplo@correo.com"></textarea>
-                        <small class="text-muted">Los correos se agregarán a la lista de destinatarios.</small>
-                    </div>
-                    
-                    <!-- Campos ocultos para manejar los valores -->
-                    <input type="hidden" th:field="*{enviarATodos}" id="enviarATodosHidden" value="true">
-                    <div id="destinatariosHidden">
-                        <!-- Los campos para destinatarios se generarán dinámicamente aquí -->
-                    </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <a th:href="@{/admin}" class="btn btn-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-success" onclick="prepararEnvio(event)">
-                            <i class="fas fa-paper-plane"></i> Enviar Correo
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </main>
-    
-    <div th:replace="fragments/footer :: footer"></div>
+    </div>
     
     <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
     <script>
@@ -112,7 +185,11 @@
                 rolSelector.style.display = 'none';
                 destinatariosPersonalizados.style.display = 'none';
                 enviarATodosHidden.value = 'true';
-                document.getElementById('rolDestinatario').value = '';
+                // Limpiar selecciones
+                document.querySelectorAll('.role-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updateSelectedRolesDisplay();
             } else if (tipoSeleccionado === 'rol') {
                 rolSelector.style.display = 'block';
                 destinatariosPersonalizados.style.display = 'none';
@@ -121,20 +198,58 @@
                 rolSelector.style.display = 'none';
                 destinatariosPersonalizados.style.display = 'block';
                 enviarATodosHidden.value = 'false';
-                document.getElementById('rolDestinatario').value = '';
+                // Limpiar selecciones
+                document.querySelectorAll('.role-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updateSelectedRolesDisplay();
             }
+        }
+        
+        function updateSelectedRolesDisplay() {
+            const selectedRoles = document.getElementById('selectedRoles');
+            const checkboxes = document.querySelectorAll('.role-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                selectedRoles.innerHTML = '<span class="text-muted">Ningún rol seleccionado</span>';
+                return;
+            }
+            
+            selectedRoles.innerHTML = '';
+            checkboxes.forEach(checkbox => {
+                const roleName = checkbox.value.replace('ROLE_', '');
+                const tag = document.createElement('span');
+                tag.className = 'role-tag';
+                tag.textContent = roleName;
+                selectedRoles.appendChild(tag);
+            });
         }
         
         function prepararEnvio(event) {
             const tipoSeleccionado = document.querySelector('input[name="tipoDestinatario"]:checked').value;
+            const destinatariosHidden = document.getElementById('destinatariosHidden');
+            destinatariosHidden.innerHTML = ''; // Limpiar campos previos
             
-            if (tipoSeleccionado === 'personalizado') {
-                event.preventDefault();
+            if (tipoSeleccionado === 'rol') {
+                const roleCheckboxes = document.querySelectorAll('.role-checkbox:checked');
+                const rolesSeleccionados = Array.from(roleCheckboxes).map(checkbox => checkbox.value);
                 
-                // Limpiar campos previos
-                const destinatariosHidden = document.getElementById('destinatariosHidden');
-                destinatariosHidden.innerHTML = '';
+                if (rolesSeleccionados.length === 0) {
+                    event.preventDefault();
+                    alert('Debe seleccionar al menos un rol para enviar el correo.');
+                    return;
+                }
                 
+                // Crear campos ocultos para cada rol seleccionado
+                rolesSeleccionados.forEach((rol, index) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'rolesDestinatarios[' + index + ']';
+                    input.value = rol;
+                    destinatariosHidden.appendChild(input);
+                });
+            } 
+            else if (tipoSeleccionado === 'personalizado') {
                 // Obtener lista de correos
                 const destinatariosText = document.getElementById('destinatariosText').value;
                 const emails = destinatariosText.split('\n')
@@ -142,6 +257,7 @@
                     .filter(email => email.length > 0);
                 
                 if (emails.length === 0) {
+                    event.preventDefault();
                     alert('Debe ingresar al menos un correo electrónico para enviar.');
                     return;
                 }
@@ -154,15 +270,17 @@
                     input.value = email;
                     destinatariosHidden.appendChild(input);
                 });
-                
-                // Enviar el formulario
-                document.getElementById('emailForm').submit();
             }
         }
         
         // Inicializar al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             toggleDestinatarios();
+            
+            // Agregar event listeners a los checkboxes de roles
+            document.querySelectorAll('.role-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedRolesDisplay);
+            });
         });
     </script>
 </body>

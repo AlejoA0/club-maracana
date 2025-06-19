@@ -38,6 +38,11 @@ public class AuthController {
         return "login";
     }
 
+    @GetMapping("/usuario-inactivo")
+    public String usuarioInactivo() {
+        return "error/inactive-user";
+    }
+
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
         model.addAttribute("usuario", new UsuarioDTO());
@@ -51,6 +56,26 @@ public class AuthController {
         if (result.hasErrors()) {
             model.addAttribute("tiposDocumento", Arrays.asList(TipoDocumento.values()));
             return "registro";
+        }
+
+        // Validación adicional para documentos con dígitos repetidos o secuencias simples
+        String documento = usuarioDTO.getNumeroDocumento();
+        if (documento != null) {
+            // Validar si todos los dígitos son iguales (ej: 1111111)
+            if (documento.matches("^(\\d)\\1+$")) {
+                result.rejectValue("numeroDocumento", "error.numeroDocumento", 
+                                  "El número de documento no puede tener todos los dígitos iguales");
+                model.addAttribute("tiposDocumento", Arrays.asList(TipoDocumento.values()));
+                return "registro";
+            }
+            
+            // Validar secuencias simples como 123456789
+            if (documento.matches("^(123456789|12345678|1234567)$")) {
+                result.rejectValue("numeroDocumento", "error.numeroDocumento", 
+                                  "El número de documento no puede ser una secuencia simple");
+                model.addAttribute("tiposDocumento", Arrays.asList(TipoDocumento.values()));
+                return "registro";
+            }
         }
 
         if (usuarioService.existeEmail(usuarioDTO.getEmail())) {

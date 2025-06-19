@@ -125,8 +125,56 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
+    /**
+     * Cambia el estado de un usuario entre activo e inactivo
+     * @param id El ID del usuario a modificar
+     * @return El nuevo estado del usuario (true = activo, false = inactivo)
+     */
+    @Transactional
+    public boolean cambiarEstadoUsuario(String id) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("El ID del usuario no puede ser nulo o vacío");
+        }
+        
+        log.info("Buscando usuario con ID: {}", id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Usuario no encontrado con ID: {}", id);
+                    return new RuntimeException("Usuario no encontrado con ID: " + id);
+                });
+        
+        // Invertir el estado actual
+        boolean estadoActual = usuario.getActivo() != null ? usuario.getActivo() : false;
+        boolean nuevoEstado = !estadoActual;
+        usuario.setActivo(nuevoEstado);
+        
+        log.info("Cambiando estado del usuario {} de {} a {}", 
+                usuario.getEmail(), estadoActual, nuevoEstado);
+        
+        usuarioRepository.save(usuario);
+        return nuevoEstado;
+    }
+
     public boolean existeEmail(String email) {
         return usuarioRepository.existsByEmail(email);
+    }
+
+    /**
+     * Verifica si hay algún usuario registrado en el sistema
+     * @return true si hay al menos un usuario, false si no hay ninguno
+     */
+    public boolean hayUsuarios() {
+        return usuarioRepository.count() > 0;
+    }
+
+    /**
+     * Guarda un usuario existente sin convertirlo desde DTO
+     * @param usuario El usuario a guardar
+     * @return El usuario guardado
+     */
+    @Transactional
+    public Usuario guardarUsuario(Usuario usuario) {
+        return usuarioRepository.save(usuario);
     }
 
     /**

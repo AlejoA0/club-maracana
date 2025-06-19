@@ -23,7 +23,7 @@ public class EmailDTO {
 
     private List<String> destinatarios;
 
-    private String rolDestinatario;
+    private List<String> rolesDestinatarios;
 
     private boolean enviarATodos;
 
@@ -52,12 +52,12 @@ public class EmailDTO {
         this.destinatarios = destinatarios;
     }
 
-    public String getRolDestinatario() {
-        return rolDestinatario;
+    public List<String> getRolesDestinatarios() {
+        return rolesDestinatarios;
     }
 
-    public void setRolDestinatario(String rolDestinatario) {
-        this.rolDestinatario = rolDestinatario;
+    public void setRolesDestinatarios(List<String> rolesDestinatarios) {
+        this.rolesDestinatarios = rolesDestinatarios;
     }
 
     public boolean isEnviarATodos() {

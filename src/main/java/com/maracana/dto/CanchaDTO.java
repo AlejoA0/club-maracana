@@ -1,6 +1,7 @@
 package com.maracana.dto;
 
 import com.maracana.model.enums.CodigoCancha;
+import com.maracana.model.enums.EstadoCancha;
 import com.maracana.model.enums.TipoCancha;
 
 import jakarta.validation.constraints.NotBlank;
@@ -22,6 +23,9 @@ public class CanchaDTO {
     
     @NotNull(message = "El tipo de cancha es obligatorio")
     private TipoCancha tipo;
+    
+    @NotNull(message = "El estado de la cancha es obligatorio")
+    private EstadoCancha estado = EstadoCancha.DISPONIBLE; // Por defecto, disponible
     
     // Métodos getter y setter explícitos para evitar problemas con Lombok
     public String getId() {
@@ -46,6 +50,14 @@ public class CanchaDTO {
     
     public void setTipo(TipoCancha tipo) {
         this.tipo = tipo;
+    }
+    
+    public EstadoCancha getEstado() {
+        return estado;
+    }
+    
+    public void setEstado(EstadoCancha estado) {
+        this.estado = estado;
     }
 }
 

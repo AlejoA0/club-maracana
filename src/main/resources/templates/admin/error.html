@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: main-layout(~{::div.contenido-principal})}">
+<head>
+    <title>Error - Club Deportivo Maracaná</title>
+</head>
+<body>
+    <div class="contenido-principal">
+        <main class="container py-4">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0">Error</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger mb-4">
+                        <h4 class="alert-heading">¡Ha ocurrido un error!</h4>
+                        <p th:text="${error ?: 'Error desconocido'}">Mensaje de error</p>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a th:href="@{/admin}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al Panel
+                        </a>
+                        <button onclick="window.location.reload()" class="btn btn-outline-primary">
+                            <i class="fas fa-sync-alt"></i> Intentar de nuevo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html> 

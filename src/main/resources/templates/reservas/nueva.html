@@ -29,6 +29,11 @@
                             <input type="date" id="fechaReserva" th:field="*{fechaReserva}" class="form-control" required
                                    th:min="${fechaMinima}">
                             <div class="text-danger" th:if="${#fields.hasErrors('fechaReserva')}" th:errors="*{fechaReserva}"></div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> 
+                                Por reglamento del club, las reservas deben realizarse con al menos 2 días de anticipación.
+                                La fecha mínima permitida es <strong th:text="${#temporals.format(fechaMinima, 'dd/MM/yyyy')}">23/06/2023</strong>.
+                            </div>
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success">Siguiente</button>
@@ -69,14 +74,14 @@
                 <div th:if="${paso == 3}" class="step-content">
                     <h5 class="card-title">Paso 3: Selecciona la Cancha</h5>
                     
-                    <div th:if="${#lists.isEmpty(canchas)}" class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i> No hay canchas disponibles para la fecha y hora seleccionadas.
+                    <div th:if="${advertencia}" class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> <span th:text="${advertencia}"></span>
                         <div class="mt-3">
-                            <a th:href="@{/reservas/nueva}" class="btn btn-outline-secondary">Cambiar Fecha</a>
+                            <a th:href="@{/reservas/nueva}" class="btn btn-outline-secondary">Cambiar Fecha/Hora</a>
                         </div>
                     </div>
                     
-                    <form th:if="${not #lists.isEmpty(canchas)}" th:action="@{/reservas/nueva/seleccion-cancha}" th:object="${reservaDTO}" method="post" id="paso3Form">
+                    <form th:action="@{/reservas/nueva/seleccion-cancha}" th:object="${reservaDTO}" method="post" id="paso3Form">
                         <input type="hidden" th:field="*{fechaReserva}">
                         <input type="hidden" th:field="*{horaReserva}">
                         <input type="hidden" id="canchaId" th:field="*{canchaId}">
@@ -90,22 +95,41 @@
                         </div>
                         
                         <div class="mb-3">
-                            <h6 class="mb-3">Selecciona una cancha:</h6>
+                            <h6 class="mb-3">Canchas:</h6>
                             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                                 <div th:each="cancha : ${canchas}" class="col">
-                                    <div class="card h-100 cancha-card" th:data-cancha-id="${cancha.id}">
-                                        <div class="card-header" th:classappend="${cancha.tipo.name() == 'FUTBOL_11' ? 'bg-success' : (cancha.tipo.name() == 'FUTBOL_8' ? 'bg-primary' : 'bg-warning')}">
+                                    <div class="card h-100 cancha-card" th:data-cancha-id="${cancha.id}"
+                                         th:classappend="${idsCanchasDisponibles != null && !idsCanchasDisponibles.contains(cancha.id) ? 'border-2 border-danger' : ''}">
+                                        <div class="card-header" 
+                                             th:classappend="${cancha.tipo.name() == 'FUTBOL_11' ? 'bg-success' : (cancha.tipo.name() == 'FUTBOL_8' ? 'bg-primary' : 'bg-warning')}">
                                             <h5 class="card-title text-white mb-0" th:text="${cancha.codigo}"></h5>
                                         </div>
                                         <div class="card-body">
                                             <p class="card-text">
-                                                <span class="badge" th:classappend="${cancha.tipo.name() == 'FUTBOL_11' ? 'bg-success' : (cancha.tipo.name() == 'FUTBOL_8' ? 'bg-primary' : 'bg-warning')}" th:text="${cancha.tipo}"></span>
+                                                <span class="badge" 
+                                                      th:classappend="${cancha.tipo.name() == 'FUTBOL_11' ? 'bg-success' : (cancha.tipo.name() == 'FUTBOL_8' ? 'bg-primary' : 'bg-warning')}" 
+                                                      th:text="${cancha.tipo}"></span>
+                                                
+                                                <!-- Estado de la cancha -->
+                                                <span th:if="${cancha.estado.name() != 'DISPONIBLE'}" class="badge bg-danger ms-2" th:text="${cancha.estado}"></span>
                                             </p>
+                                            
+                                            <!-- Mostrar mensaje de no disponible -->
+                                            <div th:if="${idsCanchasDisponibles != null && !idsCanchasDisponibles.contains(cancha.id)}" class="alert alert-danger py-1 mb-2 text-center">
+                                                <small>
+                                                    <span th:if="${cancha.estado.name() == 'DISPONIBLE'}">Reservada</span>
+                                                    <span th:if="${cancha.estado.name() == 'EN_MANTENIMIENTO'}">En Mantenimiento</span>
+                                                    <span th:if="${cancha.estado.name() == 'FUERA_DE_SERVICIO'}">Fuera de Servicio</span>
+                                                </small>
+                                            </div>
+                                            
                                             <div class="d-grid">
                                                 <button type="button" class="btn btn-outline-dark btn-select-cancha"
                                                         th:data-cancha-id="${cancha.id}" 
                                                         th:data-cancha-codigo="${cancha.codigo}" 
-                                                        th:data-cancha-tipo="${cancha.tipo}">
+                                                        th:data-cancha-tipo="${cancha.tipo}"
+                                                        th:disabled="${idsCanchasDisponibles != null && !idsCanchasDisponibles.contains(cancha.id)}"
+                                                        th:classappend="${idsCanchasDisponibles != null && !idsCanchasDisponibles.contains(cancha.id) ? 'disabled opacity-50' : ''}">
                                                     Seleccionar
                                                 </button>
                                             </div>
@@ -134,6 +158,10 @@
             // Debug - Log para ver si el script se está cargando
             console.log("Script de reservas cargado");
             
+            // Obtener la fecha mínima (2 días después de hoy)
+            const fechaMinimaStr = $("#fechaReserva").attr("min");
+            console.log("Fecha mínima desde atributo:", fechaMinimaStr);
+            
             // Añadir un botón de debug solo visible para administradores
             if ($('body').hasClass('role-admin')) {
                 $('.card-header').append('<button id="debugBtn" class="btn btn-sm btn-warning float-end">Debug</button>');
@@ -155,6 +183,19 @@
                 // Validar que la fecha esté seleccionada
                 if (!$("#fechaReserva").val()) {
                     alert("Por favor, selecciona una fecha");
+                    event.preventDefault();
+                    return false;
+                }
+                
+                // Validar que la fecha cumpla con la restricción de 2 días
+                const fechaSeleccionada = new Date($("#fechaReserva").val());
+                const fechaMinima = new Date(fechaMinimaStr);
+                
+                console.log("Fecha seleccionada (objeto):", fechaSeleccionada);
+                console.log("Fecha mínima (objeto):", fechaMinima);
+                
+                if (fechaSeleccionada < fechaMinima) {
+                    alert("La fecha debe ser al menos 2 días después de hoy");
                     event.preventDefault();
                     return false;
                 }

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.maracana.model.enums.CodigoCancha;
+import com.maracana.model.enums.EstadoCancha;
 import com.maracana.model.enums.TipoCancha;
 
 import jakarta.persistence.CascadeType;
@@ -38,6 +39,10 @@ public class Cancha {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false)
     private TipoCancha tipo;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private EstadoCancha estado = EstadoCancha.DISPONIBLE; // Por defecto, todas las canchas están disponibles
 
     @OneToMany(mappedBy = "cancha", cascade = CascadeType.ALL)
     private Set<Reserva> reservas = new HashSet<>();

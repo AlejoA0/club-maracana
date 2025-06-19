@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuario Inactivo - Club Social y Deportivo Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div class="container my-5 text-center">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <h1 class="display-1 text-danger mb-4"><i class="fas fa-user-slash"></i></h1>
+                <h2 class="mb-4">Usuario Inactivo</h2>
+                <p class="lead mb-4">Tu cuenta ha sido desactivada por un administrador.</p>
+                <p class="mb-4">Para reactivar tu cuenta, por favor comunícate con nosotros al siguiente correo electrónico:</p>
+                <div class="alert alert-info">
+                    <a href="mailto:clubmaracanafc@gmail.com" class="alert-link">
+                        <i class="fas fa-envelope"></i> clubmaracanafc@gmail.com
+                    </a>
+                </div>
+                <a href="/logout" class="btn btn-primary btn-lg mt-3">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html> 

@@ -29,6 +29,25 @@
                 <div class="step-content">
                     <h5 class="card-title">Paso 4: Confirma y Paga tu Reserva</h5>
                     
+                    <!-- Datos del usuario -->
+                    <div class="card mb-4 bg-light">
+                        <div class="card-header">
+                            <h6 class="mb-0">Datos del Usuario</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Nombre completo:</strong> <span th:text="${usuario.nombres + ' ' + usuario.apellidos}">Nombre Usuario</span></p>
+                                    <p><strong>Número de identificación:</strong> <span th:text="${usuario.numeroDocumento}">123456789</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Email:</strong> <span th:text="${usuario.email}">usuario@email.com</span></p>
+                                    <p><strong>Teléfono:</strong> <span th:text="${usuario.telefono ?: 'No registrado'}">No registrado</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Resumen de la reserva -->
                     <div class="card mb-4 bg-light">
                         <div class="card-header">
@@ -39,8 +58,9 @@
                                 <div class="col-md-6">
                                     <ul class="list-unstyled">
                                         <li><strong>Fecha:</strong> <span th:text="${#temporals.format(reservaDTO.fechaReserva, 'dd/MM/yyyy')}">01/01/2023</span></li>
-                                        <li><strong>Hora:</strong> <span th:text="${reservaDTO.horaReserva}">07:00</span></li>
-                                        <li><strong>Cancha:</strong> <span th:text="${reservaDTO.canchaId}">C1</span></li>
+                                        <li><strong>Hora:</strong> <span th:text="${reservaDTO.horaReserva.getHora()}">07:00</span></li>
+                                        <li><strong>Cancha:</strong> <span th:text="${cancha.codigo}">C1</span></li>
+                                        <li><strong>Tipo de cancha:</strong> <span th:text="${cancha.tipo}">FUTBOL_11</span></li>
                                     </ul>
                                 </div>
                                 <div class="col-md-6">
@@ -74,25 +94,161 @@
                             <div class="form-text">Este es un proceso de pago ficticio para fines de demostración.</div>
                         </div>
                         
-                        <!-- Información de pago ficticia -->
-                        <div class="card mb-4 border-dashed">
+                        <!-- Información de pago según el método seleccionado -->
+                        <div id="pagoTarjeta" class="metodo-pago-form card mb-4 border-dashed" style="display: none;">
                             <div class="card-body">
-                                <h6 class="card-subtitle mb-3 text-muted">Información del pago</h6>
+                                <h6 class="card-subtitle mb-3 text-muted">Pago con Tarjeta</h6>
                                 
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle me-2"></i>
                                     Este es un proceso de pago simulado para fines educativos. 
-                                    No se realizará ningún cargo real a tu tarjeta o cuenta bancaria.
+                                    No se realizará ningún cargo real a tu tarjeta.
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="titular" class="form-label">Titular de la cuenta/tarjeta</label>
-                                    <input type="text" class="form-control" id="titular" value="DEMOSTRACIÓN" readonly>
+                                    <label for="numeroTarjeta" class="form-label">Número de tarjeta</label>
+                                    <input type="text" class="form-control" id="numeroTarjeta" 
+                                           placeholder="1234 5678 9012 3456" 
+                                           pattern="[0-9]{13,19}" 
+                                           maxlength="19" 
+                                           title="Ingrese un número de tarjeta válido (entre 13 y 19 dígitos)">
+                                    <div class="form-text">Solo se permiten números, sin espacios ni guiones.</div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="fechaExpiracion" class="form-label">Fecha de expiración</label>
+                                        <input type="text" class="form-control" id="fechaExpiracion" 
+                                               placeholder="MM/AA" 
+                                               pattern="(0[1-9]|1[0-2])\/([0-9]{2})" 
+                                               maxlength="5" 
+                                               title="Formato MM/AA (ejemplo: 05/25)">
+                                        <div class="form-text">Formato MM/AA (ejemplo: 05/25)</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="cvv" class="form-label">CVV</label>
+                                        <input type="text" class="form-control" id="cvv" 
+                                               placeholder="123" 
+                                               pattern="[0-9]{3,4}" 
+                                               maxlength="4" 
+                                               title="3 o 4 dígitos ubicados en el reverso de la tarjeta">
+                                        <div class="form-text">3 o 4 dígitos</div>
+                                    </div>
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="numeroTarjeta" class="form-label">Número de tarjeta (ficticio)</label>
-                                    <input type="text" class="form-control" id="numeroTarjeta" value="**** **** **** 1234" readonly>
+                                    <label for="nombreTitular" class="form-label">Nombre del titular</label>
+                                    <input type="text" class="form-control" id="nombreTitular" 
+                                           th:value="${usuario.nombres + ' ' + usuario.apellidos}" 
+                                           style="text-transform: uppercase;" 
+                                           readonly>
+                                    <div class="form-text">Nombre como aparece en la tarjeta</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="pagoTransferencia" class="metodo-pago-form card mb-4 border-dashed" style="display: none;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-3 text-muted">Pago por Transferencia</h6>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Seleccione el método de transferencia de su preferencia.
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="tipoTransferencia" class="form-label">Método de transferencia</label>
+                                    <select class="form-select" id="tipoTransferencia">
+                                        <option value="">Seleccione un método...</option>
+                                        <option value="nequi">Nequi</option>
+                                        <option value="daviplata">Daviplata</option>
+                                        <option value="transfiya">Transfiya</option>
+                                        <option value="pse">PSE (Pagos Seguros en Línea)</option>
+                                        <option value="efecty">Efecty (Giros Nacionales)</option>
+                                        <option value="remesas">Remesas Internacionales</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Información específica para cada tipo de transferencia -->
+                                <div id="infoNequi" class="tipo-transferencia" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <p><strong>Nequi</strong></p>
+                                        <p>Número: 319 614 7520</p>
+                                        <p>A nombre de: Club Deportivo Maracaná</p>
+                                        <p>NIT: 900.140.603-6</p>
+                                    </div>
+                                </div>
+                                
+                                <div id="infoDaviplata" class="tipo-transferencia" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <p><strong>Daviplata</strong></p>
+                                        <p>Número: 319 614 7520</p>
+                                        <p>A nombre de: Club Deportivo Maracaná</p>
+                                        <p>NIT: 900.140.603-6</p>
+                                    </div>
+                                </div>
+                                
+                                <div id="infoTransfiya" class="tipo-transferencia" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <p><strong>Transfiya</strong></p>
+                                        <p>Número: 319 614 7520</p>
+                                        <p>A nombre de: Club Deportivo Maracaná</p>
+                                        <p>NIT: 900.140.603-6</p>
+                                    </div>
+                                </div>
+                                
+                                <div id="infoPSE" class="tipo-transferencia" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <p><strong>PSE (Pagos Seguros en Línea)</strong></p>
+                                        <p>Entidad: Banco de Bogotá</p>
+                                        <p>Cuenta: 123456789</p>
+                                        <p>Tipo: Cuenta Corriente</p>
+                                        <p>NIT: 900.140.603-6</p>
+                                    </div>
+                                </div>
+                                
+                                <div id="infoEfecty" class="tipo-transferencia" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <p><strong>Efecty (Giros Nacionales)</strong></p>
+                                        <p>Nombre: Club Deportivo Maracaná</p>
+                                        <p>NIT: 900.140.603-6</p>
+                                        <p>Ciudad: Bogotá</p>
+                                    </div>
+                                </div>
+                                
+                                <div id="infoRemesas" class="tipo-transferencia" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <p><strong>Remesas Internacionales</strong></p>
+                                        <p>Disponible a través de: Western Union, Wise, WorldRemit, Conduit</p>
+                                        <p>Nombre: Club Deportivo Maracaná</p>
+                                        <p>NIT: 900.140.603-6</p>
+                                        <p>País: Colombia</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="pagoEfectivo" class="metodo-pago-form card mb-4 border-dashed" style="display: none;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-3 text-muted">Pago en Efectivo</h6>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    El pago en efectivo debe realizarse directamente en nuestras oficinas.
+                                </div>
+                                
+                                <div class="alert alert-success">
+                                    <p><strong>Información para pago en efectivo:</strong></p>
+                                    <p>Dirección: Kilómetro 3.5 Via Suba-Cota, Bogotá</p>
+                                    <p>Horario: Lunes a Viernes de 8:00 AM a 5:00 PM</p>
+                                    <p>Lleve su documento de identidad para validar la reserva.</p>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirmarEfectivo">
+                                    <label class="form-check-label" for="confirmarEfectivo">
+                                        Entiendo que debo realizar el pago en efectivo en las oficinas antes de la fecha de mi reserva.
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -113,17 +269,136 @@
     </main>
     </div>
     
+    <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
     <script>
         $(document).ready(function() {
+            // Mostrar el formulario correspondiente según el método de pago seleccionado
+            $("#metodoPago").change(function() {
+                // Ocultar todos los formularios
+                $(".metodo-pago-form").hide();
+                
+                // Mostrar el formulario correspondiente
+                var metodoPago = $(this).val();
+                if (metodoPago === "TARJETA") {
+                    $("#pagoTarjeta").show();
+                } else if (metodoPago === "TRANSFERENCIA") {
+                    $("#pagoTransferencia").show();
+                } else if (metodoPago === "EFECTIVO") {
+                    $("#pagoEfectivo").show();
+                }
+            });
+            
+            // Formateo del número de tarjeta para insertar espacios cada 4 dígitos
+            $("#numeroTarjeta").on('input', function(e) {
+                // Eliminar todo lo que no sean números
+                let value = $(this).val().replace(/\D/g, '');
+                
+                // Limitar a 16 dígitos
+                value = value.substring(0, 19);
+                
+                // Actualizar el valor limpio
+                $(this).val(value);
+            });
+            
+            // Formateo de la fecha de expiración para formato MM/AA
+            $("#fechaExpiracion").on('input', function(e) {
+                let value = $(this).val().replace(/\D/g, '');
+                if (value.length > 0) {
+                    // Asegurar que el mes comience con 0 o 1
+                    if (value.length === 1 && parseInt(value) > 1) {
+                        value = '0' + value;
+                    }
+                    // Limitar el mes a valores válidos (01-12)
+                    if (value.length >= 2) {
+                        const month = parseInt(value.substring(0, 2));
+                        if (month === 0) {
+                            value = '01' + value.substring(2);
+                        } else if (month > 12) {
+                            value = '12' + value.substring(2);
+                        }
+                    }
+                    
+                    // Formatear como MM/AA
+                    if (value.length > 2) {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                    }
+                }
+                
+                $(this).val(value);
+            });
+            
+            // Solo permitir números en CVV
+            $("#cvv").on('input', function(e) {
+                let value = $(this).val().replace(/\D/g, '');
+                value = value.substring(0, 4); // Limitar a 4 dígitos
+                $(this).val(value);
+            });
+            
+            // Mostrar información específica según el tipo de transferencia
+            $("#tipoTransferencia").change(function() {
+                // Ocultar toda la información
+                $(".tipo-transferencia").hide();
+                
+                // Mostrar la información correspondiente
+                var tipoTransferencia = $(this).val();
+                if (tipoTransferencia) {
+                    $("#info" + tipoTransferencia.charAt(0).toUpperCase() + tipoTransferencia.slice(1)).show();
+                }
+            });
+            
             // Validación del formulario de pago
             $("#pagoForm").submit(function(event) {
                 console.log("Formulario de pago enviado");
                 
                 // Validar que el método de pago esté seleccionado
-                if (!$("#metodoPago").val()) {
+                var metodoPago = $("#metodoPago").val();
+                if (!metodoPago) {
                     alert("Por favor, selecciona un método de pago");
                     event.preventDefault();
                     return false;
+                }
+                
+                // Validaciones específicas según el método de pago
+                if (metodoPago === "TARJETA") {
+                    // Validar número de tarjeta
+                    const numeroTarjeta = $("#numeroTarjeta").val().replace(/\s/g, '');
+                    if (!numeroTarjeta || numeroTarjeta.length < 13 || numeroTarjeta.length > 19 || !/^\d+$/.test(numeroTarjeta)) {
+                        alert("Por favor, ingrese un número de tarjeta válido (entre 13 y 19 dígitos)");
+                        $("#numeroTarjeta").focus();
+                        event.preventDefault();
+                        return false;
+                    }
+                    
+                    // Validar fecha de expiración
+                    const fecha = $("#fechaExpiracion").val();
+                    if (!fecha || !/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(fecha)) {
+                        alert("Por favor, ingrese una fecha de expiración válida (MM/AA)");
+                        $("#fechaExpiracion").focus();
+                        event.preventDefault();
+                        return false;
+                    }
+                    
+                    // Validar CVV
+                    const cvv = $("#cvv").val();
+                    if (!cvv || !/^\d{3,4}$/.test(cvv)) {
+                        alert("Por favor, ingrese un código CVV válido (3 o 4 dígitos)");
+                        $("#cvv").focus();
+                        event.preventDefault();
+                        return false;
+                    }
+                } else if (metodoPago === "TRANSFERENCIA") {
+                    if (!$("#tipoTransferencia").val()) {
+                        alert("Por favor, selecciona un método de transferencia");
+                        event.preventDefault();
+                        return false;
+                    }
+                } else if (metodoPago === "EFECTIVO") {
+                    if (!$("#confirmarEfectivo").is(":checked")) {
+                        alert("Por favor, confirma que entiendes las condiciones del pago en efectivo");
+                        event.preventDefault();
+                        return false;
+                    }
                 }
                 
                 // Mostrar mensaje de procesamiento

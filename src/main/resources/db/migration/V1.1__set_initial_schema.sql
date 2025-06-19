@@ -1,0 +1,3 @@
+-- Este script representa el esquema inicial de la base de datos
+-- Como estamos trabajando con una base de datos existente, está vacío
+-- Flyway lo usará solo para mantener la secuencia de migraciones 

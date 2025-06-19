@@ -1,0 +1,2 @@
+-- Este es un script base para Flyway, no requiere cambios reales ya que estamos usando una base de datos existente
+-- Con esta migración baseline, Flyway reconocerá el estado actual de la base de datos como punto de partida 

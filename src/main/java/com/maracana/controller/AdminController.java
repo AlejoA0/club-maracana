@@ -2,6 +2,7 @@ package com.maracana.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,11 +36,13 @@ import com.maracana.model.Usuario;
 import com.maracana.model.enums.EstadoReserva;
 import com.maracana.model.enums.NombreRol;
 import com.maracana.model.enums.TipoDocumento;
+import com.maracana.model.enums.EstadoCancha;
 import com.maracana.service.CanchaService;
 import com.maracana.service.CsvService;
 import com.maracana.service.ReservaService;
 import com.maracana.service.UsuarioService;
 import com.maracana.service.email.StrategyEmailService;
+import com.maracana.service.NotificacionService;
 import com.maracana.service.report.Report;
 import com.maracana.service.report.ReportFactory;
 import com.maracana.service.report.ReportFactory.ReportType;
@@ -63,9 +67,14 @@ public class AdminController {
     private final StrategyEmailService emailService;
     private final ReportFactory reportFactory;
     private final EntityManager entityManager;
+    private final NotificacionService notificacionService;
 
     @GetMapping
-    public String mostrarPanelAdmin() {
+    public String mostrarPanelAdmin(Model model) {
+        // Obtener el conteo de notificaciones no leídas
+        long notificacionesNoLeidas = notificacionService.contarNotificacionesNoLeidas();
+        model.addAttribute("notificacionesNoLeidas", notificacionesNoLeidas);
+        
         return "admin/panel";
     }
 
@@ -75,10 +84,28 @@ public class AdminController {
                                  @RequestParam(defaultValue = "10") int tamano,
                                  @RequestParam(defaultValue = "") String filtro,
                                  Model model) {
+        // Verificar primero si hay usuarios en el sistema
+        if (!usuarioService.hayUsuarios() && pagina == 0 && filtro.isEmpty()) {
+            model.addAttribute("info", "No hay usuarios registrados en el sistema. Por favor, crea el primer usuario.");
+            // Aún así, pasamos una página vacía para que la plantilla funcione correctamente
+            Page<Usuario> usuariosVacios = new PageImpl<>(new ArrayList<>());
+            model.addAttribute("usuarios", usuariosVacios);
+            model.addAttribute("filtro", filtro);
+            model.addAttribute("paginaActual", pagina);
+            return "admin/usuarios/lista";
+        }
+        
+        // Si hay usuarios, procedemos normalmente
         Page<Usuario> usuarios = usuarioService.listarUsuariosPaginados(pagina, tamano, filtro);
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("filtro", filtro);
         model.addAttribute("paginaActual", pagina);
+        
+        // Si la búsqueda no dio resultados, mostrar un mensaje informativo
+        if (usuarios.getTotalElements() == 0 && !filtro.isEmpty()) {
+            model.addAttribute("info", "No se encontraron usuarios con el filtro: " + filtro);
+        }
+        
         return "admin/usuarios/lista";
     }
 
@@ -87,6 +114,7 @@ public class AdminController {
         model.addAttribute("usuario", new UsuarioDTO());
         model.addAttribute("tiposDocumento", Arrays.asList(TipoDocumento.values()));
         model.addAttribute("roles", Arrays.asList(NombreRol.values()));
+        model.addAttribute("editar", false);
         return "admin/usuarios/formulario";
     }
 
@@ -109,6 +137,22 @@ public class AdminController {
         } else if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty() && usuarioDTO.getPassword().length() < 6) {
             // Validar longitud solo si se proporcionó una contraseña
             result.rejectValue("password", "error.password", "La contraseña debe tener al menos 6 caracteres");
+        }
+        
+        // Validación adicional para documentos con dígitos repetidos o secuencias simples
+        if (!esEdicion && usuarioDTO.getNumeroDocumento() != null) {
+            String documento = usuarioDTO.getNumeroDocumento();
+            // Validar si todos los dígitos son iguales (ej: 1111111)
+            if (documento.matches("^(\\d)\\1+$")) {
+                result.rejectValue("numeroDocumento", "error.numeroDocumento", 
+                                  "El número de documento no puede tener todos los dígitos iguales");
+            }
+            
+            // Validar secuencias simples como 123456789
+            if (documento.matches("^(123456789|12345678|1234567)$")) {
+                result.rejectValue("numeroDocumento", "error.numeroDocumento", 
+                                  "El número de documento no puede ser una secuencia simple");
+            }
         }
         
         if (result.hasErrors()) {
@@ -172,6 +216,34 @@ public class AdminController {
         return "redirect:/admin/usuarios";
     }
 
+    @PostMapping("/usuarios/cambiar-estado/{id}")
+    public String cambiarEstadoUsuario(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        try {
+            boolean nuevoEstado = usuarioService.cambiarEstadoUsuario(id);
+            String mensaje = nuevoEstado ? "Usuario activado exitosamente" : "Usuario desactivado exitosamente";
+            redirectAttributes.addFlashAttribute("success", mensaje);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al cambiar el estado del usuario: " + e.getMessage());
+        }
+
+        return "redirect:/admin/usuarios";
+    }
+
+    @GetMapping("/usuarios/cambiar-estado/{id}")
+    public String cambiarEstadoUsuarioGet(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Cambiando estado del usuario con ID: {}", id);
+            boolean nuevoEstado = usuarioService.cambiarEstadoUsuario(id);
+            String mensaje = nuevoEstado ? "Usuario activado exitosamente" : "Usuario desactivado exitosamente";
+            log.info("Estado del usuario cambiado a: {}", nuevoEstado ? "activo" : "inactivo");
+            redirectAttributes.addFlashAttribute("success", mensaje);
+        } catch (Exception e) {
+            log.error("Error al cambiar el estado del usuario: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al cambiar el estado del usuario: " + e.getMessage());
+        }
+        return "redirect:/admin/usuarios";
+    }
+
     // Gestión de Reservas
     @GetMapping("/reservas")
     public String listarReservas(@RequestParam(defaultValue = "0") int pagina,
@@ -180,10 +252,18 @@ public class AdminController {
                                  @RequestParam(required = false) EstadoReserva estado,
                                  @RequestParam(required = false) String canchaId,
                                  Model model) {
-        Page<Reserva> reservas = reservaService.buscarReservas(fecha, estado, canchaId, pagina, tamano);
+        // Si no se especifica un estado, mostrar sólo las reservas activas (no canceladas)
+        if (estado == null) {
+            Page<Reserva> reservas = reservaService.buscarReservasActivas(fecha, canchaId, pagina, tamano);
+            model.addAttribute("reservas", reservas);
+        } else {
+            // Si se especifica un estado, buscar por ese estado
+            Page<Reserva> reservas = reservaService.buscarReservas(fecha, estado, canchaId, pagina, tamano);
+            model.addAttribute("reservas", reservas);
+        }
+        
         List<Cancha> canchas = canchaService.listarTodas();
 
-        model.addAttribute("reservas", reservas);
         model.addAttribute("canchas", canchas);
         model.addAttribute("estados", EstadoReserva.values());
         model.addAttribute("fecha", fecha);
@@ -196,12 +276,24 @@ public class AdminController {
 
     @PostMapping("/reservas/cancelar/{id}")
     public String cancelarReserva(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
-        String resultado = reservaService.eliminarReserva(id);
-
-        if (resultado.startsWith("Error")) {
-            redirectAttributes.addFlashAttribute("error", resultado);
+        // Primero obtenemos la reserva para poder crear la notificación
+        Optional<Reserva> reservaOpt = reservaService.buscarPorId(id);
+        
+        if (reservaOpt.isPresent()) {
+            Reserva reserva = reservaOpt.get();
+            // Envía notificación al usuario
+            notificacionService.crearNotificacionReservaCanceladaPorAdmin(reserva);
+            
+            // Procede con la cancelación
+            String resultado = reservaService.eliminarReserva(id);
+            
+            if (resultado.startsWith("Error")) {
+                redirectAttributes.addFlashAttribute("error", resultado);
+            } else {
+                redirectAttributes.addFlashAttribute("success", resultado);
+            }
         } else {
-            redirectAttributes.addFlashAttribute("success", resultado);
+            redirectAttributes.addFlashAttribute("error", "No se encontró la reserva con ID: " + id);
         }
 
         return "redirect:/admin/reservas";
@@ -333,9 +425,9 @@ public class AdminController {
             // Registramos el proceso para depuración
             if (emailDTO.isEnviarATodos()) {
                 log.info("Enviando correo a todos los usuarios. Asunto: {}", emailDTO.getAsunto());
-            } else if (emailDTO.getRolDestinatario() != null && !emailDTO.getRolDestinatario().isEmpty()) {
-                log.info("Enviando correo a usuarios con rol {}. Asunto: {}", 
-                        emailDTO.getRolDestinatario(), emailDTO.getAsunto());
+            } else if (emailDTO.getRolesDestinatarios() != null && !emailDTO.getRolesDestinatarios().isEmpty()) {
+                log.info("Enviando correo a usuarios con roles {}. Asunto: {}", 
+                        emailDTO.getRolesDestinatarios(), emailDTO.getAsunto());
             } else if (emailDTO.getDestinatarios() != null && !emailDTO.getDestinatarios().isEmpty()) {
                 log.info("Enviando correo a {} destinatarios específicos. Asunto: {}", 
                         emailDTO.getDestinatarios().size(), emailDTO.getAsunto());
@@ -404,5 +496,76 @@ public class AdminController {
         }
         
         return "redirect:/admin";
+    }
+
+    // Gestión de estados de canchas
+    @GetMapping("/canchas")
+    public String listarCanchas(Model model) {
+        try {
+            log.info("Accediendo a listarCanchas en AdminController");
+            List<Cancha> canchas = canchaService.listarTodas();
+            log.info("Canchas recuperadas: {}", canchas.size());
+            
+            model.addAttribute("canchas", canchas);
+            model.addAttribute("estados", EstadoCancha.values());
+            
+            // Agregar información adicional para depuración
+            for (Cancha cancha : canchas) {
+                log.info("Cancha: id={}, codigo={}, tipo={}, estado={}", 
+                        cancha.getId(), cancha.getCodigo(), cancha.getTipo(), cancha.getEstado());
+            }
+            
+            log.info("Devolviendo plantilla admin/canchas/lista.html");
+            return "admin/canchas/lista";
+        } catch (Exception e) {
+            log.error("Error en listarCanchas: {}", e.getMessage(), e);
+            model.addAttribute("error", "Error al listar canchas: " + e.getMessage());
+            // Devolver una vista alternativa en caso de error
+            return "admin/error";
+        }
+    }
+    
+    @GetMapping("/canchas/editar/{id}")
+    public String mostrarFormularioEditarCancha(@PathVariable("id") String id, Model model) {
+        Cancha cancha = canchaService.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Cancha no encontrada con ID: " + id));
+        
+        model.addAttribute("cancha", cancha);
+        model.addAttribute("estados", EstadoCancha.values());
+        return "admin/canchas/editar";
+    }
+    
+    @PostMapping("/canchas/actualizar/{id}")
+    public String actualizarEstadoCancha(@PathVariable("id") String id,
+                                        @RequestParam("estado") EstadoCancha estado,
+                                        RedirectAttributes redirectAttributes) {
+        try {
+            Cancha cancha = canchaService.actualizarEstado(id, estado);
+            log.info("Estado de cancha {} actualizado a: {}", id, estado);
+            redirectAttributes.addFlashAttribute("success", 
+                    "Estado de la cancha " + cancha.getCodigo() + " actualizado a " + estado);
+        } catch (Exception e) {
+            log.error("Error al actualizar estado de la cancha {}: {}", id, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar el estado: " + e.getMessage());
+        }
+        
+        return "redirect:/admin/canchas";
+    }
+    
+    @GetMapping("/canchas/estado/{id}/{estado}")
+    public String cambiarEstadoCancha(@PathVariable("id") String id, 
+                                      @PathVariable("estado") EstadoCancha estado,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            Cancha cancha = canchaService.actualizarEstado(id, estado);
+            log.info("Estado de cancha {} actualizado a: {}", id, estado);
+            redirectAttributes.addFlashAttribute("success", 
+                    "Estado de la cancha " + cancha.getCodigo() + " actualizado a " + estado);
+        } catch (Exception e) {
+            log.error("Error al cambiar estado de la cancha {}: {}", id, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al cambiar el estado: " + e.getMessage());
+        }
+        
+        return "redirect:/admin/canchas";
     }
 }

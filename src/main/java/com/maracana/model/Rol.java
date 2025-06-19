@@ -27,7 +27,7 @@ public class Rol {
     @Column(name = "nombre", nullable = false, unique = true)
     private NombreRol nombre;
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private Set<Usuario> usuarios = new HashSet<>();
 
     // Método explícito para evitar problemas con Lombok

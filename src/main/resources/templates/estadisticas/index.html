@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Estadísticas - Club Social y Deportivo Maracaná')"></head>
+<body>
+    <div th:replace="fragments/layout :: main-layout(~{::div.contenido-principal})">
+        <div class="contenido-principal">
+        
+        <main class="container my-5">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Estadísticas de Reservas</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Selección de período -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Selecciona un período</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="btn-group w-100" role="group">
+                                        <a th:href="@{/estadisticas(periodo=15)}" 
+                                            th:class="'btn ' + (${periodo == '15' ? 'btn-success' : 'btn-outline-success'})">
+                                            Últimos 15 días
+                                        </a>
+                                        <a th:href="@{/estadisticas(periodo=30)}" 
+                                            th:class="'btn ' + (${periodo == '30' ? 'btn-success' : 'btn-outline-success'})">
+                                            Último mes
+                                        </a>
+                                        <a th:href="@{/estadisticas(periodo=90)}" 
+                                            th:class="'btn ' + (${periodo == '90' ? 'btn-success' : 'btn-outline-success'})">
+                                            Últimos 3 meses
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen General -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Resumen General</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <p class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Mostrando estadísticas para el período: <strong th:text="${periodoTexto}">últimos 15 días</strong>
+                                    (<span th:text="${#temporals.format(fechaInicio, 'dd/MM/yyyy')}">01/01/2023</span> - 
+                                    <span th:text="${#temporals.format(fechaActual, 'dd/MM/yyyy')}">15/01/2023</span>)
+                                </p>
+                            </div>
+                            <div class="text-center mb-3">
+                                <h1 class="display-4 text-success" th:text="${totalReservas}">50</h1>
+                                <p class="lead">Total de reservas en el período</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Estadísticas por Tipo de Cancha -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Reservas por Tipo de Cancha</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Info de diagnóstico -->
+                                    <div class="alert alert-info small mb-2">
+                                        <strong>Información de diagnóstico:</strong>
+                                        <ul class="mb-0">
+                                            <li>Datos JSON: 
+                                                <span th:text="${#strings.isEmpty(estadisticasPorTipoCancha) ? 'No hay datos' : estadisticasPorTipoCancha}">Datos</span>
+                                            </li>
+                                            <li>Total items: <span th:text="${estadisticasPorTipoCancha.size()}">0</span></li>
+                                            <li>Valores: 
+                                                <th:block th:each="item, iterStat : ${estadisticasPorTipoCancha}">
+                                                    <span th:text="${item.key + '=' + item.value}"></span>
+                                                    <span th:if="${!iterStat.last}">, </span>
+                                                </th:block>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Canvas para la gráfica -->
+                                    <canvas id="chartTipoCancha"></canvas>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <table class="table table-sm table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Tipo de Cancha</th>
+                                                <th>Cantidad</th>
+                                                <th>Porcentaje</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="estadistica : ${estadisticasPorTipoCancha}" th:classappend="${estadistica.value > 0 ? '' : 'text-muted'}">
+                                                <td th:text="${estadistica.key}">FUTBOL_11</td>
+                                                <td th:text="${estadistica.value}">30</td>
+                                                <td th:text="${totalReservas > 0 ? #numbers.formatDecimal(estadistica.value * 100 / totalReservas, 1, 1) + '%' : '0%'}">60%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Estadísticas por Método de Pago -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Reservas por Método de Pago</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Info de diagnóstico -->
+                                    <div class="alert alert-info small mb-2">
+                                        <strong>Información de diagnóstico:</strong>
+                                        <ul class="mb-0">
+                                            <li>Datos JSON: 
+                                                <span th:text="${#strings.isEmpty(estadisticasPorMetodoPago) ? 'No hay datos' : estadisticasPorMetodoPago}">Datos</span>
+                                            </li>
+                                            <li>Total items: <span th:text="${estadisticasPorMetodoPago.size()}">0</span></li>
+                                            <li>Valores: 
+                                                <th:block th:each="item, iterStat : ${estadisticasPorMetodoPago}">
+                                                    <span th:text="${item.key + '=' + item.value}"></span>
+                                                    <span th:if="${!iterStat.last}">, </span>
+                                                </th:block>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Canvas para la gráfica -->
+                                    <canvas id="chartMetodoPago"></canvas>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <table class="table table-sm table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Método de Pago</th>
+                                                <th>Cantidad</th>
+                                                <th>Porcentaje</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="estadistica : ${estadisticasPorMetodoPago}" th:classappend="${estadistica.value > 0 ? '' : 'text-muted'}">
+                                                <td th:text="${estadistica.key}">EFECTIVO</td>
+                                                <td th:text="${estadistica.value}">20</td>
+                                                <td th:text="${totalReservas > 0 ? #numbers.formatDecimal(estadistica.value * 100 / totalReservas, 1, 1) + '%' : '0%'}">40%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista detallada de reservas -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Reservas en el periodo</h5>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${#lists.isEmpty(reservasPeriodo)}" class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No hay reservas registradas en el periodo seleccionado.
+                            </div>
+                            <div th:unless="${#lists.isEmpty(reservasPeriodo)}">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="table-success">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Hora</th>
+                                                <th>Cancha</th>
+                                                <th>Tipo Cancha</th>
+                                                <th>Estado</th>
+                                                <th>Método de Pago</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="reserva : ${reservasPeriodo}">
+                                                <td th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}">01/01/2023</td>
+                                                <td th:text="${reserva.horaReserva.getHora()}">07:00</td>
+                                                <td th:text="${reserva.cancha.id}">C1</td>
+                                                <td th:text="${reserva.cancha.tipo}">FUTBOL_11</td>
+                                                <td>
+                                                    <span th:class="'badge ' + 
+                                                    ${reserva.estadoReserva == T(com.maracana.model.enums.EstadoReserva).CONFIRMADA ? 'bg-success' : 
+                                                     (reserva.estadoReserva == T(com.maracana.model.enums.EstadoReserva).PENDIENTE ? 'bg-warning' : 'bg-danger')}" 
+                                                    th:text="${reserva.estadoReserva}">CONFIRMADA</span>
+                                                </td>
+                                                <td th:if="${reserva.pago != null}" th:text="${reserva.pago.metodoPago}">EFECTIVO</td>
+                                                <td th:unless="${reserva.pago != null}"><span class="badge bg-secondary">SIN PAGO</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico de barras para reservas por fecha -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Distribución de reservas por fecha</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chartFechas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        </div>
+    </div>
+    
+    <!-- Script de Chart.js para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Datos para el gráfico de tipo de cancha
+            const tipoCanchaData = {
+                labels: [
+                    <th:block th:each="estadistica, iterStat : ${estadisticasPorTipoCancha}">
+                        '[[${estadistica.key}]]'<th:block th:if="${!iterStat.last}">,</th:block>
+                    </th:block>
+                ],
+                datasets: [{
+                    label: 'Reservas por Tipo de Cancha',
+                    data: [
+                        <th:block th:each="estadistica, iterStat : ${estadisticasPorTipoCancha}">
+                            [[${estadistica.value}]]<th:block th:if="${!iterStat.last}">,</th:block>
+                        </th:block>
+                    ],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            // Datos para el gráfico de métodos de pago
+            const metodoPagoData = {
+                labels: [
+                    <th:block th:each="estadistica, iterStat : ${estadisticasPorMetodoPago}">
+                        '[[${estadistica.key}]]'<th:block th:if="${!iterStat.last}">,</th:block>
+                    </th:block>
+                ],
+                datasets: [{
+                    label: 'Reservas por Método de Pago',
+                    data: [
+                        <th:block th:each="estadistica, iterStat : ${estadisticasPorMetodoPago}">
+                            [[${estadistica.value}]]<th:block th:if="${!iterStat.last}">,</th:block>
+                        </th:block>
+                    ],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            // Procesamiento para datos de gráfico por fechas
+            const fechasReserva = {};
+            <th:block th:each="reserva : ${reservasPeriodo}">
+                const fecha = "[[${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}]]";
+                fechasReserva[fecha] = (fechasReserva[fecha] || 0) + 1;
+            </th:block>
+            
+            const fechasLabels = Object.keys(fechasReserva).sort();
+            const fechasValues = fechasLabels.map(fecha => fechasReserva[fecha]);
+            
+            const fechasData = {
+                labels: fechasLabels,
+                datasets: [{
+                    label: 'Reservas por fecha',
+                    data: fechasValues,
+                    backgroundColor: 'rgba(65, 184, 131, 0.7)',
+                    borderColor: 'rgba(65, 184, 131, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            // Crear el gráfico de tipo de cancha
+            const ctxTipoCancha = document.getElementById('chartTipoCancha').getContext('2d');
+            new Chart(ctxTipoCancha, {
+                type: 'pie',
+                data: tipoCanchaData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución por Tipo de Cancha'
+                        }
+                    }
+                }
+            });
+
+            // Crear el gráfico de métodos de pago
+            const ctxMetodoPago = document.getElementById('chartMetodoPago').getContext('2d');
+            new Chart(ctxMetodoPago, {
+                type: 'pie',
+                data: metodoPagoData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución por Método de Pago'
+                        }
+                    }
+                }
+            });
+            
+            // Crear el gráfico de reservas por fecha
+            const ctxFechas = document.getElementById('chartFechas').getContext('2d');
+            new Chart(ctxFechas, {
+                type: 'bar',
+                data: fechasData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 0
+                            }
+                        }]
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Reservas por fecha'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

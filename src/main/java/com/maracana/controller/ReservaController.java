@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -82,8 +84,11 @@ public class ReservaController {
     
     @GetMapping("/nueva")
     public String mostrarFormularioNuevaReserva(Model model) {
+        // Calcular fecha mínima (2 días después del día actual)
+        LocalDate fechaMinima = LocalDate.now().plusDays(2);
+        
         model.addAttribute("reservaDTO", new ReservaDTO());
-        model.addAttribute("fechaMinima", LocalDate.now());
+        model.addAttribute("fechaMinima", fechaMinima);
         model.addAttribute("paso", 1);
         return "reservas/nueva";
     }
@@ -91,13 +96,17 @@ public class ReservaController {
     @PostMapping("/nueva/paso1")
     public String procesarPaso1(@ModelAttribute("reservaDTO") ReservaDTO reservaDTO,
                                BindingResult result, Model model) {
-        // Validación manual de la fecha (si es necesario)
-        if (reservaDTO.getFechaReserva() == null || reservaDTO.getFechaReserva().isBefore(LocalDate.now())) {
-            result.rejectValue("fechaReserva", "error.reservaDTO", "La fecha de reserva debe ser hoy o una fecha futura");
+        // Calcular fecha mínima (2 días después del día actual)
+        LocalDate fechaMinima = LocalDate.now().plusDays(2);
+        
+        // Validación manual de la fecha - debe ser al menos 2 días después del día actual
+        if (reservaDTO.getFechaReserva() == null || reservaDTO.getFechaReserva().isBefore(fechaMinima)) {
+            result.rejectValue("fechaReserva", "error.reservaDTO", 
+                "La fecha de reserva debe ser como mínimo 2 días después de hoy (" + fechaMinima.toString() + ")");
         }
         
         if (result.hasErrors()) {
-            model.addAttribute("fechaMinima", LocalDate.now());
+            model.addAttribute("fechaMinima", fechaMinima);
             model.addAttribute("paso", 1);
             return "reservas/nueva";
         }
@@ -151,25 +160,38 @@ public class ReservaController {
                  (reservaDTO.getHoraReserva() != null ? reservaDTO.getHoraReserva().getClass().getName() : "null"));
         
         try {
-            // Obtener canchas disponibles usando el método mejorado del servicio
+            // Obtener todas las canchas
+            List<Cancha> todasLasCanchas = canchaService.listarTodasParaReserva(
+                    reservaDTO.getFechaReserva(), 
+                    reservaDTO.getHoraReserva());
+            
+            // Obtener solo las canchas disponibles para reserva
             List<Cancha> canchasDisponibles = canchaService.listarDisponibles(
                     reservaDTO.getFechaReserva(), 
                     reservaDTO.getHoraReserva());
             
-            // Log para debug
-            log.info("Canchas disponibles encontradas: {}", canchasDisponibles.size());
+            // Crear un conjunto con los IDs de las canchas disponibles para facilitar la verificación
+            Set<String> idsCanchasDisponibles = canchasDisponibles.stream()
+                    .map(Cancha::getId)
+                    .collect(Collectors.toSet());
             
-            // Verificar si hay canchas disponibles
-            if (canchasDisponibles.isEmpty()) {
-                model.addAttribute("error", "No hay canchas disponibles para la fecha y hora seleccionadas. Por favor, seleccione otra fecha u hora.");
-                model.addAttribute("horas", HoraReserva.values());
-                model.addAttribute("paso", 2);
-                return "reservas/nueva";
-            }
+            // Log para debug
+            log.info("Total de canchas: {}", todasLasCanchas.size());
+            log.info("Canchas disponibles: {}", canchasDisponibles.size());
+            
+            // Verificar si hay al menos una cancha disponible
+            boolean hayDisponibles = !canchasDisponibles.isEmpty();
             
             model.addAttribute("reservaDTO", reservaDTO);
-            model.addAttribute("canchas", canchasDisponibles);
+            model.addAttribute("canchas", todasLasCanchas);
+            model.addAttribute("idsCanchasDisponibles", idsCanchasDisponibles);
+            model.addAttribute("hayDisponibles", hayDisponibles);
             model.addAttribute("paso", 3); // Selección de cancha
+            
+            if (!hayDisponibles) {
+                model.addAttribute("advertencia", "No hay canchas disponibles para la fecha y hora seleccionadas. Se muestran todas las canchas pero no se pueden seleccionar.");
+            }
+            
             return "reservas/nueva";
         } catch (Exception e) {
             log.error("ERROR en procesarPaso2: {}", e.getMessage(), e);
@@ -184,7 +206,7 @@ public class ReservaController {
     
     @PostMapping("/nueva/seleccion-cancha")
     public String procesarSeleccionCancha(@ModelAttribute("reservaDTO") ReservaDTO reservaDTO,
-                                  BindingResult result, Model model) {
+                                  BindingResult result, Authentication authentication, Model model) {
         if (result.hasErrors()) {
             List<Cancha> canchasDisponibles = canchaService.listarDisponibles(
                     reservaDTO.getFechaReserva(), 
@@ -209,6 +231,21 @@ public class ReservaController {
             model.addAttribute("canchas", canchasDisponibles);
             model.addAttribute("paso", 3);
             return "reservas/nueva";
+        }
+        
+        // Obtener información del usuario actual
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(userDetails.getUsername());
+        
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            model.addAttribute("usuario", usuario);
+        }
+        
+        // Obtener información de la cancha seleccionada
+        Optional<Cancha> canchaOpt = canchaService.buscarPorId(reservaDTO.getCanchaId());
+        if (canchaOpt.isPresent()) {
+            model.addAttribute("cancha", canchaOpt.get());
         }
         
         // Preparar objeto de pago
@@ -261,33 +298,33 @@ public class ReservaController {
             return "redirect:/reservas/nueva";
         }
         
-        // Crear la reserva y asociar el pago
-        reservaDTO.setUsuarioId(usuario.get().getNumeroDocumento());
-        String resultadoReserva = reservaService.crearReserva(reservaDTO);
-        
-        if (resultadoReserva.startsWith("Error")) {
-            redirectAttributes.addFlashAttribute("error", resultadoReserva);
-            return "redirect:/reservas/nueva";
-        }
-        
-        // Obtener ID de la reserva recién creada
-        Optional<Reserva> reservaCreada = reservaService.buscarUltimaReservaPorUsuario(usuario.get());
-        if (reservaCreada.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Error al procesar el pago: No se pudo encontrar la reserva creada");
+        try {
+            // Crear la reserva
+            reservaDTO.setUsuarioId(usuario.get().getNumeroDocumento());
+            Reserva reservaCreada = reservaService.guardar(reservaDTO);
+            
+            if (reservaCreada == null || reservaCreada.getId() == null) {
+                redirectAttributes.addFlashAttribute("error", "Error al crear la reserva");
+                return "redirect:/reservas/nueva";
+            }
+            
+            // Procesar el pago con la reserva recién creada
+            pagoDTO.setReservaId(reservaCreada.getId());
+            String resultadoPago = pagoService.procesarPago(pagoDTO);
+            
+            if (resultadoPago.startsWith("Error")) {
+                redirectAttributes.addFlashAttribute("error", resultadoPago);
+                // No es necesario eliminar la reserva, ya que la transacción se revertirá
+                return "redirect:/reservas";
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Reserva creada y pago procesado correctamente");
+                return "redirect:/reservas";
+            }
+        } catch (Exception e) {
+            log.error("Error al procesar la reserva y el pago: ", e);
+            redirectAttributes.addFlashAttribute("error", "Error en el sistema: " + e.getMessage());
             return "redirect:/reservas";
         }
-        
-        // Procesar el pago
-        pagoDTO.setReservaId(reservaCreada.get().getId());
-        String resultadoPago = pagoService.procesarPago(pagoDTO);
-        
-        if (resultadoPago.startsWith("Error")) {
-            redirectAttributes.addFlashAttribute("error", resultadoPago);
-        } else {
-            redirectAttributes.addFlashAttribute("success", "Reserva creada y pago procesado correctamente");
-        }
-        
-        return "redirect:/reservas";
     }
 
     @PostMapping("/nueva/confirmar")
