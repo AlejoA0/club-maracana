@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa, Normas y FAQ - Club Maracaná</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .map-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .facilities-title {
+            border-left: 4px solid #198754;
+            padding-left: 15px;
+            margin: 30px 0 20px 0;
+            color: #343a40;
+        }
+        .list-group-item {
+            transition: background-color 0.3s;
+        }
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+        .section-divider {
+            height: 4px;
+            background: linear-gradient(90deg, #198754, #6c757d);
+            border-radius: 2px;
+            margin: 60px 0;
+        }
+        .faq-section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+            box-shadow: none;
+        }
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(25, 135, 84, 0.2);
+        }
+        .normas-card {
+            transition: transform 0.3s;
+        }
+        .normas-card:hover {
+            transform: translateY(-5px);
+        }
+        .section-title {
+            border-left: 4px solid #198754;
+            padding-left: 15px;
+            margin-bottom: 25px;
+            color: #343a40;
+        }
+        .section-header {
+            text-align: center; 
+            margin-bottom: 40px;
+        }
+        .section-header h2 {
+            color: #198754;
+            font-weight: bold;
+            display: inline-block;
+            border-bottom: 3px solid #198754;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Header -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <!-- Contenido principal -->
+    <main class="flex-grow-1">
+        <!-- SECCIÓN 1: MAPA -->
+        <div class="container my-5">
+            <div class="section-header">
+                <h2>Mapa del Club Maracaná</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <p class="text-muted text-center mb-5">
+                        Conoce la distribución de nuestras instalaciones y la ubicación de todas las canchas disponibles en el Club Maracaná.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 map-container mb-4">
+                    <div class="text-center">
+                        <img th:src="@{/images/mapa-maracana.webp}" alt="Mapa del Club Maracaná" class="img-fluid rounded shadow-sm" style="max-width: 100%; max-height: 600px;">
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <h3 class="facilities-title">Información de las Instalaciones</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4 shadow-sm">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Canchas Deportivas</h5>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <i class="fas fa-futbol text-success me-2"></i> 
+                                        <strong>Canchas de Fútbol 11:</strong> Contamos con 16 canchas profesionales
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-futbol text-primary me-2"></i>
+                                        <strong>Canchas de Fútbol 8:</strong> 4 canchas disponibles para esta modalidad
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-baby text-warning me-2"></i>
+                                        <strong>Canchas Infantiles:</strong> 7 espacios especiales para los más pequeños
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4 shadow-sm">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Servicios y Facilidades</h5>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <i class="fas fa-home text-danger me-2"></i>
+                                        <strong>Casetas:</strong> Ubicadas en la zona de la entrada
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-car text-secondary me-2"></i>
+                                        <strong>Zona Parqueadero:</strong> Amplio espacio para vehículos alrededor del club
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-restroom text-info me-2"></i>
+                                        <strong>Baños:</strong> Disponibles en todas las zonas del complejo
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Divisor de secciones -->
+        <div class="container">
+            <div class="section-divider"></div>
+        </div>
+        
+        <!-- SECCIÓN 2: NORMAS Y FAQ -->
+        <div class="container my-5">
+            <div class="section-header">
+                <h2>Normas y Preguntas Frecuentes</h2>
+            </div>
+            
+            <p class="text-muted text-center mb-5">
+                Conoce las normas y encuentra respuestas a las preguntas más frecuentes sobre nuestro club
+            </p>
+            
+            <div class="row g-4">
+                <!-- Normas de Convivencia -->
+                <div class="col-lg-6">
+                    <h3 class="section-title">Normas de Convivencia</h3>
+                    <div class="card shadow-sm normas-card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Reglamento del Club</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <p class="text-muted mb-4">
+                                A continuación puedes ver las normas de convivencia que rigen en el Club Maracaná.
+                                Por favor, léelas detenidamente y respétalas para asegurar una experiencia agradable para todos.
+                            </p>
+                            
+                            <img th:src="@{/images/normas-convivencia-maracana.webp}" class="img-fluid rounded shadow-sm" 
+                                 alt="Normas de Convivencia del Club Maracaná" style="max-width: 100%;">
+                                 
+                            <div class="mt-4">
+                                <p class="text-success fw-bold">
+                                    <i class="fas fa-check-circle me-2"></i> El cumplimiento de estas normas garantiza un ambiente deportivo seguro y agradable para todos
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ -->
+                <div class="col-lg-6">
+                    <h3 class="section-title">Preguntas Frecuentes</h3>
+                    <div class="card shadow-sm faq-section">
+                        <div class="card-body">
+                            <div class="accordion" id="accordionFAQ">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                                            <i class="fas fa-question-circle text-success me-2"></i> ¿Cómo puedo reservar una cancha?
+                                        </button>
+                                    </h2>
+                                    <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#accordionFAQ">
+                                        <div class="accordion-body">
+                                            Para reservar una cancha debes iniciar sesión en el sistema, ir a la sección "Mis Reservas" y hacer clic en "Nueva Reserva". Selecciona la cancha, fecha y hora disponibles y procede con el pago correspondiente para confirmar tu reserva.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                                            <i class="fas fa-question-circle text-success me-2"></i> ¿Cuántas reservas activas puedo tener?
+                                        </button>
+                                    </h2>
+                                    <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                        <div class="accordion-body">
+                                            Cada usuario puede tener un máximo de 3 reservas activas simultáneamente. Una vez que se completa una reserva, podrás realizar otra.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                                            <i class="fas fa-question-circle text-success me-2"></i> ¿Puedo cancelar una reserva?
+                                        </button>
+                                    </h2>
+                                    <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                        <div class="accordion-body">
+                                            Sí, puedes cancelar una reserva hasta 24 horas antes del horario reservado. La cancelación se realiza desde la sección "Mis Reservas", seleccionando la reserva correspondiente y haciendo clic en "Cancelar".
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                                            <i class="fas fa-question-circle text-success me-2"></i> ¿Qué métodos de pago aceptan?
+                                        </button>
+                                    </h2>
+                                    <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                        <div class="accordion-body">
+                                            Aceptamos tres métodos de pago: efectivo (directamente en las instalaciones), tarjeta de crédito/débito y transferencia bancaria. Todos los pagos quedan registrados en el sistema.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse5" aria-expanded="false" aria-controls="collapse5">
+                                            <i class="fas fa-question-circle text-success me-2"></i> ¿Qué debo hacer si una cancha está en mal estado?
+                                        </button>
+                                    </h2>
+                                    <div id="collapse5" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                        <div class="accordion-body">
+                                            Si encuentras una cancha en mal estado, por favor repórtalo inmediatamente a la administración del club. Puedes hacerlo personalmente en recepción o mediante un correo electrónico a admin@maracana.com detallando el problema.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse6" aria-expanded="false" aria-controls="collapse6">
+                                            <i class="fas fa-question-circle text-success me-2"></i> ¿Cómo formar parte de un equipo?
+                                        </button>
+                                    </h2>
+                                    <div id="collapse6" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                        <div class="accordion-body">
+                                            Para formar parte de un equipo, debes recibir una invitación del director técnico del equipo. Una vez recibida la invitación, podrás aceptarla desde tu perfil en la sección correspondiente.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <!-- Scripts -->
+    <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/scripts.js}"></script>
+</body>
+</html> 

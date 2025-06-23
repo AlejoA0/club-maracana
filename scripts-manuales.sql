@@ -134,4 +134,7 @@ AND tipo_destinatario = 'USUARIO';
 UPDATE reserva 
 SET estado_reserva = 'VENCIDA'
 WHERE fecha_reserva < CURDATE() 
-AND estado_reserva = 'CONFIRMADA'; 
+AND estado_reserva = 'CONFIRMADA';
+
+-- Agregar columna motivo_bloqueo a la tabla usuario
+ALTER TABLE usuario ADD COLUMN motivo_bloqueo VARCHAR(255) DEFAULT NULL;

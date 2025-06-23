@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Desactivar CSRF para simplificar
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/error").permitAll()
-                        .requestMatchers("/", "/index", "/registro", "/login", "/usuario-inactivo").permitAll()
+                        .requestMatchers("/", "/index", "/registro", "/login", "/usuario-inactivo", "/mapa", "/faq-normas").permitAll()
                         .requestMatchers("/admin/**", "/debug/**").hasRole("ADMIN")
                         .requestMatchers("/equipos/**").hasAnyRole("JUGADOR", "DIRECTOR_TECNICO", "ADMIN")
                         .requestMatchers("/reservas/**").hasAnyRole("JUGADOR", "ADMIN", "DIRECTOR_TECNICO")
@@ -45,6 +45,12 @@ public class SecurityConfig {
                             if (exception instanceof org.springframework.security.authentication.DisabledException 
                                     || exception instanceof org.springframework.security.authentication.LockedException
                                     || exception.getMessage().contains("disabled")) {
+                                // Obtener el nombre de usuario del formulario de login
+                                String username = request.getParameter("username");
+                                if (username != null && !username.isEmpty()) {
+                                    // Guardar el nombre de usuario para recuperarlo en la página de usuario inactivo
+                                    request.getSession().setAttribute("blockedUserEmail", username);
+                                }
                                 response.sendRedirect("/usuario-inactivo");
                             } else {
                                 // Para otros errores, redirigir a la página de login con el error

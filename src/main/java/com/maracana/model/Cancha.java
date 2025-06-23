@@ -43,6 +43,9 @@ public class Cancha {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private EstadoCancha estado = EstadoCancha.DISPONIBLE; // Por defecto, todas las canchas están disponibles
+    
+    @Column(name = "motivo_cambio_estado", length = 255)
+    private String motivoCambioEstado; // Motivo del cambio de estado
 
     @OneToMany(mappedBy = "cancha", cascade = CascadeType.ALL)
     private Set<Reserva> reservas = new HashSet<>();

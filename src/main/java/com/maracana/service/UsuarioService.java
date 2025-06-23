@@ -148,11 +148,45 @@ public class UsuarioService {
         boolean nuevoEstado = !estadoActual;
         usuario.setActivo(nuevoEstado);
         
+        // Si está activando, limpiamos el motivo de bloqueo
+        if (nuevoEstado) {
+            usuario.setMotivoBloqueo(null);
+        }
+        
         log.info("Cambiando estado del usuario {} de {} a {}", 
                 usuario.getEmail(), estadoActual, nuevoEstado);
         
         usuarioRepository.save(usuario);
         return nuevoEstado;
+    }
+
+    /**
+     * Cambia el estado de un usuario a inactivo con un motivo de bloqueo
+     * @param id El ID del usuario a bloquear
+     * @param motivoBloqueo El motivo por el cual se bloquea al usuario
+     * @return false, indicando que el usuario ha sido desactivado
+     */
+    @Transactional
+    public boolean bloquearUsuario(String id, String motivoBloqueo) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("El ID del usuario no puede ser nulo o vacío");
+        }
+        
+        log.info("Buscando usuario con ID: {} para bloquear", id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Usuario no encontrado con ID: {}", id);
+                    return new RuntimeException("Usuario no encontrado con ID: " + id);
+                });
+        
+        usuario.setActivo(false);
+        usuario.setMotivoBloqueo(motivoBloqueo);
+        
+        log.info("Bloqueando usuario {} con motivo: {}", 
+                usuario.getEmail(), motivoBloqueo);
+        
+        usuarioRepository.save(usuario);
+        return false; // Retorna false porque el usuario ahora está inactivo
     }
 
     public boolean existeEmail(String email) {

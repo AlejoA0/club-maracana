@@ -31,6 +31,9 @@
                                 <span th:if="${cancha.estado.name() == 'EN_MANTENIMIENTO'}" class="badge bg-warning">En Mantenimiento</span>
                                 <span th:if="${cancha.estado.name() == 'FUERA_DE_SERVICIO'}" class="badge bg-danger">Fuera de Servicio</span>
                             </p>
+                            <p th:if="${cancha.motivoCambioEstado != null && !cancha.motivoCambioEstado.isEmpty()}">
+                                <strong>Motivo del último cambio:</strong> <span th:text="${cancha.motivoCambioEstado}"></span>
+                            </p>
                         </div>
                     </div>
 
@@ -45,6 +48,17 @@
                                         th:selected="${estadoOpt == cancha.estado}"></option>
                             </select>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label for="motivoCambioEstado" class="form-label">Motivo del cambio de estado</label>
+                            <textarea class="form-control" id="motivoCambioEstado" name="motivoCambioEstado" 
+                                      rows="3" placeholder="Explique el motivo del cambio de estado" required
+                                      th:text="${cancha.motivoCambioEstado}"></textarea>
+                            <small class="form-text text-muted">
+                                Este mensaje será visible para los usuarios cuando intenten reservar esta cancha.
+                            </small>
+                        </div>
+                        
                         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                     </form>
                 </div>

@@ -22,6 +22,7 @@ import com.maracana.service.EmailService;
 import com.maracana.service.UsuarioService;
 
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +40,37 @@ public class AuthController {
     }
 
     @GetMapping("/usuario-inactivo")
-    public String usuarioInactivo() {
+    public String usuarioInactivo(Model model, HttpServletRequest request) {
+        // Intentamos obtener el usuario de la sesión o del parámetro
+        String email = null;
+        
+        // Verificar si el email está en la sesión (guardado por el failureHandler)
+        Object emailEnSesion = request.getSession().getAttribute("blockedUserEmail");
+        if (emailEnSesion != null) {
+            email = emailEnSesion.toString();
+            // Limpiamos la sesión para no mantener este dato
+            request.getSession().removeAttribute("blockedUserEmail");
+        }
+        
+        // Si no encontramos el email en la sesión, intentamos obtenerlo de la autenticación
+        if (email == null) {
+            Object principal = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+                email = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+            }
+        }
+        
+        // Si tenemos email, buscamos el usuario y su motivo de bloqueo
+        if (email != null) {
+            logger.info("Buscando motivo de bloqueo para usuario: " + email);
+            usuarioService.buscarPorEmail(email).ifPresent(usuario -> {
+                if (!usuario.getActivo() && usuario.getMotivoBloqueo() != null) {
+                    model.addAttribute("motivoBloqueo", usuario.getMotivoBloqueo());
+                    logger.info("Motivo de bloqueo encontrado: " + usuario.getMotivoBloqueo());
+                }
+            });
+        }
+        
         return "error/inactive-user";
     }
 

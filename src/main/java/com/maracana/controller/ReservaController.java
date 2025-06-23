@@ -379,13 +379,39 @@ public class ReservaController {
     }
     
     @PostMapping("/{id}/cancelar")
-    public String cancelarReserva(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
-        String resultado = reservaService.eliminarReserva(id);
-        
-        if (resultado.startsWith("Error")) {
-            redirectAttributes.addFlashAttribute("error", resultado);
-        } else {
-            redirectAttributes.addFlashAttribute("success", resultado);
+    public String cancelarReserva(@PathVariable("id") Integer id, Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(userDetails.getUsername());
+            
+            if (!usuarioOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
+                return "redirect:/reservas";
+            }
+            
+            // Verificar que la reserva pertenece al usuario
+            Optional<Reserva> reservaOpt = reservaService.buscarPorId(id);
+            if (!reservaOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Reserva no encontrada");
+                return "redirect:/reservas";
+            }
+            
+            Reserva reserva = reservaOpt.get();
+            if (!reserva.getUsuario().getNumeroDocumento().equals(usuarioOpt.get().getNumeroDocumento())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permiso para cancelar esta reserva");
+                return "redirect:/reservas";
+            }
+            
+            String resultado = reservaService.eliminarReserva(id);
+            
+            if (resultado.startsWith("Error")) {
+                redirectAttributes.addFlashAttribute("error", resultado);
+            } else {
+                redirectAttributes.addFlashAttribute("success", resultado);
+            }
+        } catch (Exception e) {
+            log.error("Error al cancelar reserva: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al cancelar la reserva: " + e.getMessage());
         }
         
         return "redirect:/reservas";

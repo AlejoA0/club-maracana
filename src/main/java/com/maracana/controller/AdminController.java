@@ -37,6 +37,8 @@ import com.maracana.model.enums.EstadoReserva;
 import com.maracana.model.enums.NombreRol;
 import com.maracana.model.enums.TipoDocumento;
 import com.maracana.model.enums.EstadoCancha;
+import com.maracana.model.enums.TipoCancha;
+import com.maracana.model.Notificacion;
 import com.maracana.service.CanchaService;
 import com.maracana.service.CsvService;
 import com.maracana.service.ReservaService;
@@ -240,6 +242,21 @@ public class AdminController {
         } catch (Exception e) {
             log.error("Error al cambiar el estado del usuario: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("error", "Error al cambiar el estado del usuario: " + e.getMessage());
+        }
+        return "redirect:/admin/usuarios";
+    }
+
+    @PostMapping("/usuarios/bloquear/{id}")
+    public String bloquearUsuario(@PathVariable("id") String id, 
+                                 @RequestParam("motivoBloqueo") String motivoBloqueo,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Bloqueando usuario con ID: {} y motivo: {}", id, motivoBloqueo);
+            usuarioService.bloquearUsuario(id, motivoBloqueo);
+            redirectAttributes.addFlashAttribute("success", "Usuario bloqueado exitosamente");
+        } catch (Exception e) {
+            log.error("Error al bloquear el usuario: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al bloquear el usuario: " + e.getMessage());
         }
         return "redirect:/admin/usuarios";
     }
@@ -501,28 +518,23 @@ public class AdminController {
     // Gestión de estados de canchas
     @GetMapping("/canchas")
     public String listarCanchas(Model model) {
-        try {
-            log.info("Accediendo a listarCanchas en AdminController");
-            List<Cancha> canchas = canchaService.listarTodas();
-            log.info("Canchas recuperadas: {}", canchas.size());
-            
-            model.addAttribute("canchas", canchas);
-            model.addAttribute("estados", EstadoCancha.values());
-            
-            // Agregar información adicional para depuración
-            for (Cancha cancha : canchas) {
-                log.info("Cancha: id={}, codigo={}, tipo={}, estado={}", 
-                        cancha.getId(), cancha.getCodigo(), cancha.getTipo(), cancha.getEstado());
-            }
-            
-            log.info("Devolviendo plantilla admin/canchas/lista.html");
-            return "admin/canchas/lista";
-        } catch (Exception e) {
-            log.error("Error en listarCanchas: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error al listar canchas: " + e.getMessage());
-            // Devolver una vista alternativa en caso de error
-            return "admin/error";
-        }
+        List<Cancha> canchas = canchaService.listarTodas();
+        model.addAttribute("canchas", canchas);
+        
+        // Contar canchas por estado
+        long canchasDisponibles = canchas.stream()
+                .filter(c -> c.getEstado() == EstadoCancha.DISPONIBLE).count();
+        long canchasMantenimiento = canchas.stream()
+                .filter(c -> c.getEstado() == EstadoCancha.EN_MANTENIMIENTO).count();
+        long canchasFueraServicio = canchas.stream()
+                .filter(c -> c.getEstado() == EstadoCancha.FUERA_DE_SERVICIO).count();
+        
+        model.addAttribute("canchasDisponibles", canchasDisponibles);
+        model.addAttribute("canchasMantenimiento", canchasMantenimiento);
+        model.addAttribute("canchasFueraServicio", canchasFueraServicio);
+        model.addAttribute("tiposDeCanchas", TipoCancha.values());
+        
+        return "admin/canchas/lista";
     }
     
     @GetMapping("/canchas/editar/{id}")
@@ -538,10 +550,11 @@ public class AdminController {
     @PostMapping("/canchas/actualizar/{id}")
     public String actualizarEstadoCancha(@PathVariable("id") String id,
                                         @RequestParam("estado") EstadoCancha estado,
+                                        @RequestParam("motivoCambioEstado") String motivoCambioEstado,
                                         RedirectAttributes redirectAttributes) {
         try {
-            Cancha cancha = canchaService.actualizarEstado(id, estado);
-            log.info("Estado de cancha {} actualizado a: {}", id, estado);
+            Cancha cancha = canchaService.actualizarEstadoConMotivo(id, estado, motivoCambioEstado);
+            log.info("Estado de cancha {} actualizado a: {} con motivo: {}", id, estado, motivoCambioEstado);
             redirectAttributes.addFlashAttribute("success", 
                     "Estado de la cancha " + cancha.getCodigo() + " actualizado a " + estado);
         } catch (Exception e) {
@@ -567,5 +580,44 @@ public class AdminController {
         }
         
         return "redirect:/admin/canchas";
+    }
+
+    // Gestión de Notificaciones
+    @GetMapping("/notificaciones")
+    public String listarNotificaciones(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano,
+            Model model) {
+        
+        Page<Notificacion> notificaciones = notificacionService.obtenerNotificacionesPaginadas(pagina, tamano);
+        
+        model.addAttribute("notificaciones", notificaciones);
+        model.addAttribute("paginaActual", pagina);
+        
+        return "admin/notificaciones/lista";
+    }
+    
+    @PostMapping("/notificaciones/marcar-todas-leidas")
+    public String marcarTodasNotificacionesComoLeidas(RedirectAttributes redirectAttributes) {
+        try {
+            notificacionService.marcarTodasComoLeidas();
+            redirectAttributes.addFlashAttribute("success", "Todas las notificaciones han sido marcadas como leídas");
+        } catch (Exception e) {
+            log.error("Error al marcar todas las notificaciones como leídas: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al marcar las notificaciones como leídas: " + e.getMessage());
+        }
+        return "redirect:/admin/notificaciones";
+    }
+    
+    @PostMapping("/notificaciones/{id}/marcar-leida")
+    public String marcarNotificacionComoLeida(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            notificacionService.marcarComoLeida(id);
+            redirectAttributes.addFlashAttribute("success", "Notificación marcada como leída");
+        } catch (Exception e) {
+            log.error("Error al marcar notificación como leída: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al marcar la notificación como leída: " + e.getMessage());
+        }
+        return "redirect:/admin/notificaciones";
     }
 }

@@ -223,6 +223,28 @@ public class CanchaService {
         }).orElseThrow(() -> new RuntimeException("Cancha no encontrada con ID: " + id));
     }
     
+    /**
+     * Actualiza el estado de una cancha y registra el motivo del cambio
+     */
+    @Transactional
+    public Cancha actualizarEstadoConMotivo(String id, EstadoCancha estado, String motivoCambioEstado) {
+        return canchaRepository.findById(id).map(cancha -> {
+            // Guardar el estado anterior para notificaciones
+            EstadoCancha estadoAnterior = cancha.getEstado();
+            
+            cancha.setEstado(estado);
+            cancha.setMotivoCambioEstado(motivoCambioEstado);
+            Cancha canchaActualizada = canchaRepository.save(cancha);
+            
+            // Si cambió el estado, crear notificación
+            if (estadoAnterior != estado) {
+                notificacionService.crearNotificacionCambioEstadoCancha(canchaActualizada, estadoAnterior.toString());
+            }
+            
+            return canchaActualizada;
+        }).orElseThrow(() -> new RuntimeException("Cancha no encontrada con ID: " + id));
+    }
+    
     @Transactional
     public void eliminar(String id) {
         canchaRepository.deleteById(id);

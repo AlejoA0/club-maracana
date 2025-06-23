@@ -123,6 +123,12 @@
                                                 </small>
                                             </div>
                                             
+                                            <!-- Mostrar el motivo del cambio de estado -->
+                                            <div th:if="${cancha.estado.name() != 'DISPONIBLE' && cancha.motivoCambioEstado != null && !cancha.motivoCambioEstado.isEmpty()}" 
+                                                 class="alert alert-warning py-1 mb-2 small">
+                                                <strong>Motivo:</strong> <span th:text="${cancha.motivoCambioEstado}"></span>
+                                            </div>
+                                            
                                             <div class="d-grid">
                                                 <button type="button" class="btn btn-outline-dark btn-select-cancha"
                                                         th:data-cancha-id="${cancha.id}" 

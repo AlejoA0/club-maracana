@@ -57,6 +57,9 @@ public class Usuario {
     @Column(name = "activo")
     private Boolean activo = true;
 
+    @Column(name = "motivo_bloqueo", length = 255)
+    private String motivoBloqueo;
+
     @Column(name = "ultima_actualizacion_nombre")
     private LocalDate ultimaActualizacionNombre;
 

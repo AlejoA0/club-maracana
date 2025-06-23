@@ -88,12 +88,22 @@
                                            class="btn btn-sm btn-primary" title="Editar usuario">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a th:href="@{/admin/usuarios/cambiar-estado/{id}(id=${usuario.numeroDocumento})}"
-                                           class="btn btn-sm"
-                                           th:classappend="${usuario.activo ? 'btn-danger' : 'btn-success'}"
-                                           th:title="${usuario.activo ? 'Desactivar usuario' : 'Activar usuario'}"
-                                           onclick="return confirm('¿Estás seguro de que deseas ' + (this.classList.contains('btn-danger') ? 'desactivar' : 'activar') + ' este usuario?');">
-                                            <i class="fas" th:classappend="${usuario.activo ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                                        <!-- Si está activo, mostrar botón para bloquear con modal -->
+                                        <button th:if="${usuario.activo}" type="button"
+                                           class="btn btn-sm btn-danger"
+                                           th:data-id="${usuario.numeroDocumento}"
+                                           th:data-nombre="${usuario.nombreCompleto}"
+                                           onclick="prepararBloqueo(this.getAttribute('data-id'), this.getAttribute('data-nombre'))"
+                                           title="Desactivar usuario">
+                                            <i class="fas fa-user-slash"></i>
+                                        </button>
+                                        <!-- Si está inactivo, permitir activar directamente -->
+                                        <a th:unless="${usuario.activo}" 
+                                           th:href="@{/admin/usuarios/cambiar-estado/{id}(id=${usuario.numeroDocumento})}"
+                                           class="btn btn-sm btn-success"
+                                           title="Activar usuario"
+                                           onclick="return confirm('¿Estás seguro de que deseas activar este usuario?');">
+                                            <i class="fas fa-user-check"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -125,10 +135,58 @@
         </div>
     </main>
     
+    <!-- Modal para bloqueo de usuario -->
+    <div class="modal fade" id="modalBloquearUsuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-slash me-2"></i>Bloquear Usuario
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formBloqueo" method="post">
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ¿Estás seguro de que deseas bloquear al usuario <span id="nombreUsuario" class="fw-bold"></span>?
+                        </div>
+                        <div class="mb-3">
+                            <label for="motivoBloqueo" class="form-label">Motivo del bloqueo:</label>
+                            <textarea class="form-control" id="motivoBloqueo" name="motivoBloqueo" rows="3" 
+                                required placeholder="Indica el motivo por el cual estás bloqueando a este usuario"></textarea>
+                            <div class="form-text">
+                                Este mensaje será mostrado al usuario cuando intente iniciar sesión.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-user-slash me-1"></i> Bloquear Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     <div th:replace="fragments/footer :: footer"></div>
     
     <!-- Scripts de Bootstrap -->
     <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
     <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+    
+    <!-- Scripts personalizados -->
+    <script>
+        function prepararBloqueo(id, nombre) {
+            document.getElementById('nombreUsuario').textContent = nombre;
+            document.getElementById('formBloqueo').action = '/admin/usuarios/bloquear/' + id;
+            
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('modalBloquearUsuario'));
+            modal.show();
+        }
+    </script>
 </body>
 </html>

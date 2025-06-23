@@ -54,27 +54,75 @@ public class NotificacionService {
     }
     
     /**
-     * Crea una notificacion por una reserva cancelada por un usuario (para administradores)
+     * Crea una notificacion por una nueva reserva (para el usuario que la creó)
      */
     @Transactional
-    public Notificacion crearNotificacionReservaCancelada(Reserva reserva) {
-        String mensaje = String.format("Reserva cancelada por %s para la cancha %s el dia %s a las %s", 
-                reserva.getUsuario().getNombreCompleto(),
+    public Notificacion crearNotificacionReservaNuevaParaUsuario(Reserva reserva) {
+        String mensaje = String.format("Has realizado una reserva para la cancha %s el día %s a las %s", 
                 reserva.getCancha().getId(),
                 reserva.getFechaReserva().toString(),
                 reserva.getHoraReserva().toString());
         
         Notificacion notificacion = new Notificacion();
         notificacion.setMensaje(mensaje);
-        notificacion.setTipo(TipoNotificacion.RESERVA_CANCELADA);
+        notificacion.setTipo(TipoNotificacion.RESERVA_NUEVA);
         notificacion.setFechaCreacion(LocalDateTime.now());
         notificacion.setLeida(false);
         notificacion.setReferenciaId(reserva.getId());
         notificacion.setReferenciaTipo("RESERVA");
-        notificacion.setTipoDestinatario(TipoDestinatario.ADMIN); // Esta notificación es para administradores
+        notificacion.setTipoDestinatario(TipoDestinatario.USUARIO);
+        notificacion.setDestinatarioId(reserva.getUsuario().getNumeroDocumento());
         
-        log.info("Creando notificacion para reserva cancelada: {}", mensaje);
+        log.info("Creando notificación de nueva reserva para el usuario {}: {}", 
+                reserva.getUsuario().getNumeroDocumento(), mensaje);
         return notificacionRepository.save(notificacion);
+    }
+    
+    /**
+     * Crea una notificacion por una reserva cancelada por un usuario (para administradores)
+     */
+    @Transactional
+    public Notificacion crearNotificacionReservaCancelada(Reserva reserva) {
+        // Notificación para el administrador
+        String mensajeAdmin = String.format("Reserva cancelada por %s para la cancha %s el dia %s a las %s", 
+                reserva.getUsuario().getNombreCompleto(),
+                reserva.getCancha().getId(),
+                reserva.getFechaReserva().toString(),
+                reserva.getHoraReserva().toString());
+        
+        Notificacion notificacionAdmin = new Notificacion();
+        notificacionAdmin.setMensaje(mensajeAdmin);
+        notificacionAdmin.setTipo(TipoNotificacion.RESERVA_CANCELADA);
+        notificacionAdmin.setFechaCreacion(LocalDateTime.now());
+        notificacionAdmin.setLeida(false);
+        notificacionAdmin.setReferenciaId(reserva.getId());
+        notificacionAdmin.setReferenciaTipo("RESERVA");
+        notificacionAdmin.setTipoDestinatario(TipoDestinatario.ADMIN); // Esta notificación es para administradores
+        
+        log.info("Creando notificación para admin sobre reserva cancelada por usuario: {}", mensajeAdmin);
+        Notificacion notificacionAdminGuardada = notificacionRepository.save(notificacionAdmin);
+        
+        // Notificación para el propio usuario que canceló la reserva
+        String mensajeUsuario = String.format("Has cancelado tu reserva para la cancha %s el día %s a las %s", 
+                reserva.getCancha().getId(),
+                reserva.getFechaReserva().toString(),
+                reserva.getHoraReserva().toString());
+        
+        Notificacion notificacionUsuario = new Notificacion();
+        notificacionUsuario.setMensaje(mensajeUsuario);
+        notificacionUsuario.setTipo(TipoNotificacion.RESERVA_CANCELADA);
+        notificacionUsuario.setFechaCreacion(LocalDateTime.now());
+        notificacionUsuario.setLeida(false);
+        notificacionUsuario.setReferenciaId(reserva.getId());
+        notificacionUsuario.setReferenciaTipo("RESERVA");
+        notificacionUsuario.setTipoDestinatario(TipoDestinatario.USUARIO);
+        notificacionUsuario.setDestinatarioId(reserva.getUsuario().getNumeroDocumento());
+        
+        log.info("Creando notificación para el usuario {} sobre su propia cancelación: {}", 
+                reserva.getUsuario().getNumeroDocumento(), mensajeUsuario);
+        notificacionRepository.save(notificacionUsuario);
+        
+        return notificacionAdminGuardada;
     }
     
     /**
@@ -107,8 +155,12 @@ public class NotificacionService {
      */
     @Transactional
     public void crearNotificacionCambioEstadoCancha(Cancha cancha, String estadoAnterior) {
-        String mensaje = String.format("La cancha %s ha cambiado de estado: %s → %s", 
-                cancha.getId(), estadoAnterior, cancha.getEstado().toString());
+        String motivoMensaje = cancha.getMotivoCambioEstado() != null && !cancha.getMotivoCambioEstado().isEmpty() 
+                ? " Motivo: " + cancha.getMotivoCambioEstado() 
+                : "";
+                
+        String mensaje = String.format("La cancha %s ha cambiado de estado: %s → %s.%s", 
+                cancha.getId(), estadoAnterior, cancha.getEstado().toString(), motivoMensaje);
         
         Notificacion notificacionAdmin = new Notificacion();
         notificacionAdmin.setMensaje(mensaje);
@@ -121,15 +173,40 @@ public class NotificacionService {
         
         notificacionRepository.save(notificacionAdmin);
         
-        // Crear notificaciones para usuarios con reservas activas en esta cancha
+        // Crear notificaciones para TODOS los usuarios, sin importar si tienen reservas
         if (cancha.getEstado() == EstadoCancha.EN_MANTENIMIENTO || cancha.getEstado() == EstadoCancha.FUERA_DE_SERVICIO) {
-            // Aquí se podría buscar usuarios con reservas activas en esta cancha y notificarles
+            String mensajeUsuarios = String.format("La cancha %s ahora está %s.%s Si tienes reservas en esta cancha, pueden verse afectadas.", 
+                    cancha.getId(), 
+                    cancha.getEstado().toString().replace("_", " ").toLowerCase(),
+                    motivoMensaje);
+            
+            // Notificar a todos los usuarios
             usuarioRepository.findAll().forEach(usuario -> {
-                String mensajeUsuario = String.format("La cancha %s ahora está %s. Si tienes reservas en esta cancha, pueden verse afectadas.", 
-                        cancha.getId(), cancha.getEstado().toString().replace("_", " ").toLowerCase());
-                
+                // Crear notificación personalizada para cada usuario
                 Notificacion notificacionUsuario = new Notificacion();
-                notificacionUsuario.setMensaje(mensajeUsuario);
+                notificacionUsuario.setMensaje(mensajeUsuarios);
+                notificacionUsuario.setTipo(TipoNotificacion.CANCHA_ESTADO_CAMBIO);
+                notificacionUsuario.setFechaCreacion(LocalDateTime.now());
+                notificacionUsuario.setLeida(false);
+                notificacionUsuario.setReferenciaId(null);
+                notificacionUsuario.setReferenciaTipo("CANCHA");
+                notificacionUsuario.setTipoDestinatario(TipoDestinatario.USUARIO);
+                notificacionUsuario.setDestinatarioId(usuario.getNumeroDocumento());
+                
+                notificacionRepository.save(notificacionUsuario);
+                log.debug("Notificación de cambio de estado de cancha creada para el usuario: {}", 
+                        usuario.getNumeroDocumento());
+            });
+            
+            log.info("Notificaciones de cambio de estado de cancha enviadas a todos los usuarios");
+        } else if (cancha.getEstado() == EstadoCancha.DISPONIBLE) {
+            // Si la cancha vuelve a estar disponible, notificar a los usuarios
+            String mensajeDisponible = String.format("¡Buenas noticias! La cancha %s ahora está disponible para reservas.", 
+                    cancha.getId());
+            
+            usuarioRepository.findAll().forEach(usuario -> {
+                Notificacion notificacionUsuario = new Notificacion();
+                notificacionUsuario.setMensaje(mensajeDisponible);
                 notificacionUsuario.setTipo(TipoNotificacion.CANCHA_ESTADO_CAMBIO);
                 notificacionUsuario.setFechaCreacion(LocalDateTime.now());
                 notificacionUsuario.setLeida(false);
@@ -140,9 +217,11 @@ public class NotificacionService {
                 
                 notificacionRepository.save(notificacionUsuario);
             });
+            
+            log.info("Notificaciones de cancha disponible enviadas a todos los usuarios");
         }
         
-        log.info("Creando notificaciones por cambio de estado de cancha {}: {}", cancha.getId(), mensaje);
+        log.info("Notificaciones por cambio de estado de cancha {} creadas exitosamente", cancha.getId());
     }
     
     /**

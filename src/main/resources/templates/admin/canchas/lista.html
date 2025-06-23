@@ -59,10 +59,12 @@
                                                 Cambiar Estado
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                <li th:each="estado : ${estados}">
-                                                    <a class="dropdown-item" 
-                                                    th:href="@{/admin/canchas/estado/{id}/{estado}(id=${cancha.id}, estado=${estado})}"
-                                                    th:text="${estado}"></a>
+                                                <li th:each="estado : ${T(com.maracana.model.enums.EstadoCancha).values()}">
+                                                    <a class="dropdown-item cambiar-estado" 
+                                                       href="#" 
+                                                       th:data-cancha-id="${cancha.id}" 
+                                                       th:data-estado="${estado}"
+                                                       th:text="${estado}"></a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -104,10 +106,65 @@
         <div th:replace="fragments/footer :: footer"></div>
     </div>
 
+    <!-- Modal para ingresar motivo de cambio de estado -->
+    <div class="modal fade" id="modalMotivoCambio" tabindex="-1" aria-labelledby="modalMotivoCambioLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalMotivoCambioLabel">Motivo del Cambio de Estado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formCambioEstado" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="motivoCambioEstado" class="form-label">Motivo del cambio:</label>
+                            <textarea class="form-control" id="motivoCambioEstado" name="motivoCambioEstado" rows="3" required></textarea>
+                            <div class="form-text">Por favor, indique el motivo por el cual está cambiando el estado de la cancha.</div>
+                        </div>
+                        <input type="hidden" id="estadoSeleccionado" name="estado">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
     <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/scripts.js}"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener todos los enlaces de cambio de estado
+            const cambiarEstadoLinks = document.querySelectorAll('.cambiar-estado');
+            
+            // Modal de cambio de estado
+            const modalMotivoCambio = new bootstrap.Modal(document.getElementById('modalMotivoCambio'));
+            const formCambioEstado = document.getElementById('formCambioEstado');
+            
+            // Agregar evento click a cada enlace
+            cambiarEstadoLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Obtener datos del enlace
+                    const canchaId = this.getAttribute('data-cancha-id');
+                    const estado = this.getAttribute('data-estado');
+                    
+                    // Configurar el formulario
+                    formCambioEstado.action = `/admin/canchas/actualizar/${canchaId}`;
+                    document.getElementById('estadoSeleccionado').value = estado;
+                    
+                    // Mostrar el modal
+                    modalMotivoCambio.show();
+                });
+            });
+        });
+    </script>
     
     <!-- Estilos específicos para canchas -->
     <link rel="stylesheet" th:href="@{/css/canchas.css}">

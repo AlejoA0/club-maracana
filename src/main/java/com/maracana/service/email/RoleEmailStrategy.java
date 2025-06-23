@@ -1,5 +1,6 @@
 package com.maracana.service.email;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -93,10 +94,22 @@ public class RoleEmailStrategy implements EmailStrategy {
         
         helper.setSubject(asunto);
         helper.setText(cuerpo, true); // true para contenido HTML
-        helper.setTo(emailsArray);
+        
+        try {
+            // Envío como copia oculta para preservar la privacidad de los destinatarios
+            helper.setFrom("clubmaracanafc@gmail.com", "Club Social y Deportivo Maracaná");
+            helper.setTo("clubmaracanafc@gmail.com"); // Establecer el remitente como destinatario principal
+            helper.setBcc(emailsArray); // Usar copia oculta (BCC) para los destinatarios reales
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error al configurar el remitente con nombre personalizado: {}", e.getMessage());
+            // Si falla con el nombre personalizado, intentar solo con la dirección
+            helper.setFrom("clubmaracanafc@gmail.com");
+            helper.setTo("clubmaracanafc@gmail.com");
+            helper.setBcc(emailsArray);
+        }
         
         mailSender.send(message);
-        log.info("Correo enviado a usuarios con roles {}: {} destinatarios", roles, emails.size());
+        log.info("Correo enviado en copia oculta a usuarios con roles {}: {} destinatarios", roles, emails.size());
     }
     
     @Override

@@ -27,6 +27,7 @@ CREATE TABLE `cancha` (
   `codigo` enum('CANCHA_1','CANCHA_10','CANCHA_11','CANCHA_12','CANCHA_13','CANCHA_14','CANCHA_16','CANCHA_17','CANCHA_18','CANCHA_2A','CANCHA_2B','CANCHA_3','CANCHA_4','CANCHA_5','CANCHA_6','CANCHA_7','CANCHA_8','CANCHA_9','CANCHA_BABY_1','CANCHA_BABY_2','FUTBOL_8_1','FUTBOL_8_2','FUTBOL_8_3','FUTBOL_8_4','TRANSICION_1','TRANSICION_2','TRANSICION_3') COLLATE utf8mb4_general_ci NOT NULL,
   `tipo` enum('FUTBOL_11','FUTBOL_8','INFANTIL') COLLATE utf8mb4_general_ci NOT NULL,
   `estado` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'DISPONIBLE',
+  `motivo_cambio_estado` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -37,7 +38,7 @@ CREATE TABLE `cancha` (
 
 LOCK TABLES `cancha` WRITE;
 /*!40000 ALTER TABLE `cancha` DISABLE KEYS */;
-INSERT INTO `cancha` VALUES ('C1','CANCHA_1','FUTBOL_11','DISPONIBLE'),('C10','CANCHA_10','FUTBOL_11','DISPONIBLE'),('C11','CANCHA_11','FUTBOL_11','EN_MANTENIMIENTO'),('C12','CANCHA_12','FUTBOL_11','DISPONIBLE'),('C13','CANCHA_13','FUTBOL_11','FUERA_DE_SERVICIO'),('C14','CANCHA_14','FUTBOL_11','DISPONIBLE'),('C16','CANCHA_16','FUTBOL_11','DISPONIBLE'),('C17','CANCHA_17','FUTBOL_11','DISPONIBLE'),('C18','CANCHA_18','FUTBOL_11','DISPONIBLE'),('C2A','CANCHA_2A','INFANTIL','DISPONIBLE'),('C2B','CANCHA_2B','INFANTIL','DISPONIBLE'),('C3','CANCHA_3','FUTBOL_11','DISPONIBLE'),('C4','CANCHA_4','FUTBOL_11','DISPONIBLE'),('C5','CANCHA_5','FUTBOL_11','DISPONIBLE'),('C6','CANCHA_6','FUTBOL_11','DISPONIBLE'),('C7','CANCHA_7','FUTBOL_11','DISPONIBLE'),('C8','CANCHA_8','FUTBOL_11','DISPONIBLE'),('C9','CANCHA_9','FUTBOL_11','DISPONIBLE'),('CAN_29','CANCHA_11','FUTBOL_11','DISPONIBLE'),('CB1','CANCHA_BABY_1','INFANTIL','DISPONIBLE'),('CB2','CANCHA_BABY_2','INFANTIL','DISPONIBLE'),('F8_1','FUTBOL_8_1','FUTBOL_8','DISPONIBLE'),('F8_2','FUTBOL_8_2','FUTBOL_8','DISPONIBLE'),('F8_3','FUTBOL_8_3','FUTBOL_8','DISPONIBLE'),('F8_4','FUTBOL_8_4','FUTBOL_8','DISPONIBLE'),('TR1','TRANSICION_1','INFANTIL','DISPONIBLE'),('TR2','TRANSICION_2','INFANTIL','DISPONIBLE'),('TR3','TRANSICION_3','INFANTIL','DISPONIBLE');
+INSERT INTO `cancha` VALUES ('C1','CANCHA_1','FUTBOL_11','DISPONIBLE',NULL),('C10','CANCHA_10','FUTBOL_11','DISPONIBLE',NULL),('C11','CANCHA_11','FUTBOL_11','EN_MANTENIMIENTO',NULL),('C12','CANCHA_12','FUTBOL_11','DISPONIBLE',NULL),('C13','CANCHA_13','FUTBOL_11','FUERA_DE_SERVICIO',NULL),('C14','CANCHA_14','FUTBOL_11','DISPONIBLE',NULL),('C16','CANCHA_16','FUTBOL_11','DISPONIBLE',NULL),('C17','CANCHA_17','FUTBOL_11','DISPONIBLE',NULL),('C18','CANCHA_18','FUTBOL_11','EN_MANTENIMIENTO','Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas'),('C2A','CANCHA_2A','INFANTIL','DISPONIBLE',NULL),('C2B','CANCHA_2B','INFANTIL','DISPONIBLE',NULL),('C3','CANCHA_3','FUTBOL_11','DISPONIBLE',NULL),('C4','CANCHA_4','FUTBOL_11','DISPONIBLE',NULL),('C5','CANCHA_5','FUTBOL_11','DISPONIBLE',NULL),('C6','CANCHA_6','FUTBOL_11','DISPONIBLE',NULL),('C7','CANCHA_7','FUTBOL_11','DISPONIBLE',NULL),('C8','CANCHA_8','FUTBOL_11','DISPONIBLE',NULL),('C9','CANCHA_9','FUTBOL_11','DISPONIBLE',NULL),('CAN_29','CANCHA_11','FUTBOL_11','DISPONIBLE',NULL),('CB1','CANCHA_BABY_1','INFANTIL','DISPONIBLE',NULL),('CB2','CANCHA_BABY_2','INFANTIL','DISPONIBLE',NULL),('F8_1','FUTBOL_8_1','FUTBOL_8','DISPONIBLE',NULL),('F8_2','FUTBOL_8_2','FUTBOL_8','DISPONIBLE',NULL),('F8_3','FUTBOL_8_3','FUTBOL_8','DISPONIBLE',NULL),('F8_4','FUTBOL_8_4','FUTBOL_8','DISPONIBLE',NULL),('TR1','TRANSICION_1','INFANTIL','DISPONIBLE',NULL),('TR2','TRANSICION_2','INFANTIL','DISPONIBLE',NULL),('TR3','TRANSICION_3','INFANTIL','DISPONIBLE',NULL);
 /*!40000 ALTER TABLE `cancha` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -170,7 +171,7 @@ CREATE TABLE `notificacion` (
   KEY `idx_notificacion_fecha` (`fecha_creacion`),
   KEY `idx_notificacion_tipo_destinatario` (`tipo_destinatario`),
   KEY `idx_notificacion_destinatario_id` (`destinatario_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -179,7 +180,7 @@ CREATE TABLE `notificacion` (
 
 LOCK TABLES `notificacion` WRITE;
 /*!40000 ALTER TABLE `notificacion` DISABLE KEYS */;
-INSERT INTO `notificacion` VALUES (1,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-04-12 a las 07:00:00','RESERVA_CANCELADA','2025-06-17 12:00:24.000000',0,4,'RESERVA','ADMIN',NULL),(2,'Nueva reserva creada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-20 a las 09:00:00','RESERVA_NUEVA','2025-06-17 14:34:54.000000',0,15,'RESERVA','ADMIN',NULL),(3,'Un administrador ha cancelado tu reserva para la cancha C1 el día 2025-06-19 a las 09:00:00','RESERVA_CANCELADA','2025-06-18 05:35:06.113896',0,13,'RESERVA','ADMIN',NULL),(4,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-19 a las 09:00:00','RESERVA_CANCELADA','2025-06-18 05:35:06.294783',0,13,'RESERVA','ADMIN',NULL),(5,'Un administrador ha cancelado tu reserva para la cancha C1 el día 2025-06-20 a las 07:00:00','RESERVA_CANCELADA','2025-06-18 05:35:12.777069',0,14,'RESERVA','ADMIN',NULL),(6,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-20 a las 07:00:00','RESERVA_CANCELADA','2025-06-18 05:35:12.864015',0,14,'RESERVA','ADMIN',NULL);
+INSERT INTO `notificacion` VALUES (1,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-04-12 a las 07:00:00','RESERVA_CANCELADA','2025-06-17 12:00:24.000000',1,4,'RESERVA','ADMIN',NULL),(2,'Nueva reserva creada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-20 a las 09:00:00','RESERVA_NUEVA','2025-06-17 14:34:54.000000',1,15,'RESERVA','ADMIN',NULL),(3,'Un administrador ha cancelado tu reserva para la cancha C1 el día 2025-06-19 a las 09:00:00','RESERVA_CANCELADA','2025-06-18 05:35:06.113896',1,13,'RESERVA','ADMIN',NULL),(4,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-19 a las 09:00:00','RESERVA_CANCELADA','2025-06-18 05:35:06.294783',1,13,'RESERVA','ADMIN',NULL),(5,'Un administrador ha cancelado tu reserva para la cancha C1 el día 2025-06-20 a las 07:00:00','RESERVA_CANCELADA','2025-06-18 05:35:12.777069',1,14,'RESERVA','ADMIN',NULL),(6,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-20 a las 07:00:00','RESERVA_CANCELADA','2025-06-18 05:35:12.864015',1,14,'RESERVA','ADMIN',NULL),(7,'Nueva reserva creada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-25 a las 07:00:00','RESERVA_NUEVA','2025-06-23 07:02:35.167454',1,16,'RESERVA','ADMIN',NULL),(8,'Has realizado una reserva para la cancha C1 el día 2025-06-25 a las 07:00:00','RESERVA_NUEVA','2025-06-23 07:02:35.185443',0,16,'RESERVA','USUARIO','1016594699'),(9,'Un administrador ha cancelado tu reserva para la cancha F8_2 el día 2025-04-12 a las 15:00:00','RESERVA_CANCELADA_ADMIN','2025-06-23 07:03:56.474886',0,5,'RESERVA','USUARIO','5696448'),(10,'Un administrador ha cancelado tu reserva para la cancha C1 el día 2025-06-25 a las 07:00:00','RESERVA_CANCELADA_ADMIN','2025-06-23 07:04:03.440266',0,16,'RESERVA','USUARIO','1016594699'),(11,'Reserva cancelada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-25 a las 07:00:00','RESERVA_CANCELADA','2025-06-23 07:04:03.643935',1,16,'RESERVA','ADMIN',NULL),(12,'Nueva reserva creada por Alejandro Poveda Acero para la cancha C10 el dia 2025-06-25 a las 07:00:00','RESERVA_NUEVA','2025-06-23 16:52:14.999323',1,17,'RESERVA','ADMIN',NULL),(13,'Has realizado una reserva para la cancha C10 el día 2025-06-25 a las 07:00:00','RESERVA_NUEVA','2025-06-23 16:52:15.019314',0,17,'RESERVA','USUARIO','1016594699'),(14,'Un administrador ha cancelado tu reserva para la cancha C10 el día 2025-06-25 a las 07:00:00','RESERVA_CANCELADA_ADMIN','2025-06-23 16:53:08.150259',0,17,'RESERVA','USUARIO','1016594699'),(15,'Reserva cancelada por Alejandro Poveda Acero para la cancha C10 el dia 2025-06-25 a las 07:00:00','RESERVA_CANCELADA','2025-06-23 16:53:08.326735',1,17,'RESERVA','ADMIN',NULL),(16,'Has cancelado tu reserva para la cancha C10 el día 2025-06-25 a las 07:00:00','RESERVA_CANCELADA','2025-06-23 16:53:08.337728',0,17,'RESERVA','USUARIO','1016594699'),(17,'Nueva reserva creada por ALEJANDRO ACERO para la cancha C1 el dia 2025-06-25 a las 09:00:00','RESERVA_NUEVA','2025-06-23 17:36:33.557243',0,18,'RESERVA','ADMIN',NULL),(18,'Has realizado una reserva para la cancha C1 el día 2025-06-25 a las 09:00:00','RESERVA_NUEVA','2025-06-23 17:36:33.579228',0,18,'RESERVA','USUARIO','101659469'),(19,'Nueva reserva creada por Alejandro Poveda Acero para la cancha C10 el dia 2025-07-05 a las 07:00:00','RESERVA_NUEVA','2025-06-23 18:13:14.206589',0,19,'RESERVA','ADMIN',NULL),(20,'Has realizado una reserva para la cancha C10 el día 2025-07-05 a las 07:00:00','RESERVA_NUEVA','2025-06-23 18:13:14.227577',0,19,'RESERVA','USUARIO','1016594699'),(21,'Nueva reserva creada por Alejandro Poveda Acero para la cancha C1 el dia 2025-06-27 a las 09:00:00','RESERVA_NUEVA','2025-06-23 19:07:45.770733',0,20,'RESERVA','ADMIN',NULL),(22,'Has realizado una reserva para la cancha C1 el día 2025-06-27 a las 09:00:00','RESERVA_NUEVA','2025-06-23 19:07:45.797717',0,20,'RESERVA','USUARIO','1016594699'),(23,'La cancha C18 ha cambiado de estado: DISPONIBLE → EN_MANTENIMIENTO. Motivo: Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas','CANCHA_ESTADO_CAMBIO','2025-06-23 19:17:00.396287',0,NULL,'CANCHA','ADMIN',NULL),(24,'La cancha C18 ahora está en mantenimiento. Motivo: Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas Si tienes reservas en esta cancha, pueden verse afectadas.','CANCHA_ESTADO_CAMBIO','2025-06-23 19:17:00.672986',0,NULL,'CANCHA','USUARIO','1000000001'),(25,'La cancha C18 ahora está en mantenimiento. Motivo: Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas Si tienes reservas en esta cancha, pueden verse afectadas.','CANCHA_ESTADO_CAMBIO','2025-06-23 19:17:00.684978',0,NULL,'CANCHA','USUARIO','101659469'),(26,'La cancha C18 ahora está en mantenimiento. Motivo: Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas Si tienes reservas en esta cancha, pueden verse afectadas.','CANCHA_ESTADO_CAMBIO','2025-06-23 19:17:00.692974',0,NULL,'CANCHA','USUARIO','1016594699'),(27,'La cancha C18 ahora está en mantenimiento. Motivo: Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas Si tienes reservas en esta cancha, pueden verse afectadas.','CANCHA_ESTADO_CAMBIO','2025-06-23 19:17:00.708962',0,NULL,'CANCHA','USUARIO','1019023278'),(28,'La cancha C18 ahora está en mantenimiento. Motivo: Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas Si tienes reservas en esta cancha, pueden verse afectadas.','CANCHA_ESTADO_CAMBIO','2025-06-23 19:17:00.716957',0,NULL,'CANCHA','USUARIO','312'),(29,'La cancha C18 ahora está en mantenimiento. Motivo: Se realizará mantenimiento a esta cancha, quedará inhabilitada para reservas Si tienes reservas en esta cancha, pueden verse afectadas.','CANCHA_ESTADO_CAMBIO','2025-06-23 19:17:00.725956',0,NULL,'CANCHA','USUARIO','5696448'),(30,'Nueva reserva creada por Alejandro Poveda Acero para la cancha F8_4 el dia 2025-06-25 a las 09:00:00','RESERVA_NUEVA','2025-06-23 19:18:00.898115',0,21,'RESERVA','ADMIN',NULL),(31,'Has realizado una reserva para la cancha F8_4 el día 2025-06-25 a las 09:00:00','RESERVA_NUEVA','2025-06-23 19:18:00.915105',0,21,'RESERVA','USUARIO','1016594699');
 /*!40000 ALTER TABLE `notificacion` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -199,7 +200,7 @@ CREATE TABLE `pago` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `reserva_id` (`reserva_id`),
   CONSTRAINT `pago_ibfk_1` FOREIGN KEY (`reserva_id`) REFERENCES `reserva` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,7 +209,7 @@ CREATE TABLE `pago` (
 
 LOCK TABLES `pago` WRITE;
 /*!40000 ALTER TABLE `pago` DISABLE KEYS */;
-INSERT INTO `pago` VALUES (1,13,160000.00,'TARJETA','2025-06-16 12:43:34'),(2,14,160000.00,'TARJETA','2025-06-16 12:49:24'),(3,15,160000.00,'EFECTIVO','2025-06-17 14:34:54');
+INSERT INTO `pago` VALUES (1,13,160000.00,'TARJETA','2025-06-16 12:43:34'),(2,14,160000.00,'TARJETA','2025-06-16 12:49:24'),(3,15,160000.00,'EFECTIVO','2025-06-17 14:34:54'),(4,16,160000.00,'TARJETA','2025-06-23 07:02:35'),(5,17,160000.00,'TRANSFERENCIA','2025-06-23 16:52:15'),(6,18,160000.00,'TRANSFERENCIA','2025-06-23 17:36:34'),(7,19,160000.00,'EFECTIVO','2025-06-23 18:13:14'),(8,20,160000.00,'TRANSFERENCIA','2025-06-23 19:07:46'),(9,21,160000.00,'EFECTIVO','2025-06-23 19:18:01');
 /*!40000 ALTER TABLE `pago` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -231,7 +232,7 @@ CREATE TABLE `reserva` (
   KEY `jugador_id` (`jugador_id`),
   CONSTRAINT `reserva_ibfk_1` FOREIGN KEY (`cancha_id`) REFERENCES `cancha` (`id`),
   CONSTRAINT `reserva_ibfk_2` FOREIGN KEY (`jugador_id`) REFERENCES `usuario` (`numero_documento`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -240,7 +241,7 @@ CREATE TABLE `reserva` (
 
 LOCK TABLES `reserva` WRITE;
 /*!40000 ALTER TABLE `reserva` DISABLE KEYS */;
-INSERT INTO `reserva` VALUES (1,'2025-04-12','07:00:00','CANCELADA','C1','1016594699'),(2,'2025-04-12','07:00:00','CANCELADA','C10','1016594699'),(3,'2025-04-12','07:00:00','CANCELADA','C11','1016594699'),(4,'2025-04-12','07:00:00','CANCELADA','C1','1016594699'),(5,'2025-04-12','15:00:00','VENCIDA','F8_2','5696448'),(11,'2025-04-12','07:00:00','CANCELADA','C9','101659469'),(12,'2025-04-25','09:00:00','VENCIDA','C16','101659469'),(13,'2025-06-19','09:00:00','CANCELADA','C1','1016594699'),(14,'2025-06-20','07:00:00','CANCELADA','C1','1016594699'),(15,'2025-06-20','09:00:00','CONFIRMADA','C1','1016594699');
+INSERT INTO `reserva` VALUES (1,'2025-04-12','07:00:00','CANCELADA','C1','1016594699'),(2,'2025-04-12','07:00:00','CANCELADA','C10','1016594699'),(3,'2025-04-12','07:00:00','CANCELADA','C11','1016594699'),(4,'2025-04-12','07:00:00','CANCELADA','C1','1016594699'),(5,'2025-04-12','15:00:00','VENCIDA','F8_2','5696448'),(11,'2025-04-12','07:00:00','CANCELADA','C9','101659469'),(12,'2025-04-25','09:00:00','VENCIDA','C16','101659469'),(13,'2025-06-19','09:00:00','CANCELADA','C1','1016594699'),(14,'2025-06-20','07:00:00','CANCELADA','C1','1016594699'),(15,'2025-06-20','09:00:00','VENCIDA','C1','1016594699'),(16,'2025-06-25','07:00:00','CANCELADA','C1','1016594699'),(17,'2025-06-25','07:00:00','CANCELADA','C10','1016594699'),(18,'2025-06-25','09:00:00','CONFIRMADA','C1','101659469'),(19,'2025-07-05','07:00:00','CONFIRMADA','C10','1016594699'),(20,'2025-06-27','09:00:00','CONFIRMADA','C1','1016594699'),(21,'2025-06-25','09:00:00','CONFIRMADA','F8_4','1016594699');
 /*!40000 ALTER TABLE `reserva` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -320,6 +321,7 @@ CREATE TABLE `usuario` (
   `puede_jugar` bit(1) DEFAULT b'0',
   `activo` bit(1) DEFAULT b'1',
   `ultima_actualizacion_nombre` date DEFAULT NULL,
+  `motivo_bloqueo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`numero_documento`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -331,7 +333,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES ('1000000001','CEDULA_CIUDADANIA','Administrador','Sistema','admin@maracana.com','admin123',NULL,NULL,NULL,_binary '\0',_binary '',NULL),('101659469','REGISTRO_CIVIL','ALEJANDRO','ACERO','alpovedaac7d@gmail.com','alejo123','2005-07-05','Sanitas','3194785205',_binary '\0',_binary '',NULL),('1016594699','CEDULA_CIUDADANIA','Alejandro','Poveda Acero','alejandropovedaacero@gmail.com','alejo123','2005-07-05','Sanitas','3196147520',_binary '\0',_binary '','2025-06-16'),('1019023278','CEDULA_CIUDADANIA','Catherine','Acero','catherineacerog@gmail.com','cathe123','1987-03-23','Sanitas','3195277425',_binary '\0',_binary '\0',NULL),('312','CEDULA_CIUDADANIA','Daniel','Gonzalez','danielcorreo@gmail.com','daniel123','2005-07-05','Sanitas','90312',_binary '\0',_binary '',NULL),('5696448','PERMISO_PROTECCION_TEMPORAL','Anni','Alvins','annnjjk1@gmail.com','anni123','2006-01-24','Salud Total','3125037798',_binary '\0',_binary '',NULL);
+INSERT INTO `usuario` VALUES ('1000000001','CEDULA_CIUDADANIA','Administrador','Sistema','admin@maracana.com','admin123',NULL,NULL,NULL,_binary '\0',_binary '',NULL,NULL),('101659469','REGISTRO_CIVIL','ALEJANDRO','ACERO','alpovedaac7d@gmail.com','alejo123','2005-07-05','Sanitas','3194785205',_binary '\0',_binary '',NULL,NULL),('1016594699','CEDULA_CIUDADANIA','Alejandro','Poveda Acero','alejandropovedaacero@gmail.com','alejo123','2005-07-05','Sanitas','3196147520',_binary '\0',_binary '','2025-06-16',NULL),('1019023278','CEDULA_CIUDADANIA','Catherine','Acero','catherineacerog@gmail.com','cathe123','1987-03-23','Sanitas','3195277425',_binary '\0',_binary '\0',NULL,NULL),('312','CEDULA_CIUDADANIA','Daniel','Gonzalez','danielcorreo@gmail.com','daniel123','2005-07-05','Sanitas','90312',_binary '\0',_binary '',NULL,NULL),('5696448','PERMISO_PROTECCION_TEMPORAL','Anni','Alvins','annnjjk1@gmail.com','anni123','2006-01-24','Salud Total','3125037798',_binary '\0',_binary '',NULL,NULL);
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -523,4 +525,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-18 19:55:51
+-- Dump completed on 2025-06-23 14:54:32

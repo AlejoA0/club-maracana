@@ -1,6 +1,7 @@
 package com.maracana.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -459,6 +460,9 @@ public class ReservaService {
         
         // Crear notificación para la nueva reserva
         notificacionService.crearNotificacionReservaNueva(reservaGuardada);
+        
+        // Crear notificación para el usuario que realizó la reserva
+        notificacionService.crearNotificacionReservaNuevaParaUsuario(reservaGuardada);
 
         return reservaGuardada;
     }
@@ -713,6 +717,103 @@ public class ReservaService {
             return Collections.emptyList();
         }
     }
+    
+    /**
+     * Cuenta el número de reservas de un usuario específico en un periodo
+     * Incluye reservas actuales y futuras dentro del periodo
+     */
+    public long contarReservasUsuarioEnPeriodo(Usuario usuario, LocalDate fechaInicio, LocalDate fechaFin) {
+        try {
+            Query query = entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM reserva WHERE jugador_id = ?1 AND fecha_reserva >= ?2 AND fecha_reserva <= ?3"
+            );
+            query.setParameter(1, usuario.getNumeroDocumento());
+            query.setParameter(2, fechaInicio);
+            query.setParameter(3, fechaFin);
+            
+            return ((Number) query.getSingleResult()).longValue();
+        } catch (Exception e) {
+            log.error("Error al contar reservas del usuario {} en periodo {}-{}: {}", 
+                     usuario.getNumeroDocumento(), fechaInicio, fechaFin, e.getMessage(), e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Cuenta el número de reservas de un usuario por tipo de cancha en un periodo específico
+     * Incluye reservas actuales y futuras dentro del periodo
+     */
+    public long contarReservasUsuarioPorTipoCanchaEnPeriodo(Usuario usuario, String tipoCancha, LocalDate fechaInicio, LocalDate fechaFin) {
+        try {
+            log.debug("Contando reservas del usuario {} por tipo de cancha: {} en periodo {}-{}", 
+                    usuario.getNumeroDocumento(), tipoCancha, fechaInicio, fechaFin);
+            
+            String sql = "SELECT COUNT(*) FROM reserva r " +
+                "JOIN cancha c ON r.cancha_id = c.id " +
+                "WHERE r.jugador_id = ?1 AND c.tipo = ?2 AND r.fecha_reserva >= ?3 AND r.fecha_reserva <= ?4";
+                
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter(1, usuario.getNumeroDocumento());
+            query.setParameter(2, tipoCancha);
+            query.setParameter(3, fechaInicio);
+            query.setParameter(4, fechaFin);
+            
+            Number result = (Number) query.getSingleResult();
+            return result != null ? result.longValue() : 0;
+        } catch (Exception e) {
+            log.error("Error al contar reservas del usuario {} por tipo de cancha {} en periodo {}-{}: {}", 
+                     usuario.getNumeroDocumento(), tipoCancha, fechaInicio, fechaFin, e.getMessage(), e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Cuenta el número de reservas de un usuario por método de pago en un periodo específico
+     * Incluye reservas actuales y futuras dentro del periodo
+     */
+    public long contarReservasUsuarioPorMetodoPagoEnPeriodo(Usuario usuario, MetodoPago metodoPago, LocalDate fechaInicio, LocalDate fechaFin) {
+        try {
+            log.debug("Contando reservas del usuario {} por método de pago: {} en periodo {}-{}", 
+                    usuario.getNumeroDocumento(), metodoPago, fechaInicio, fechaFin);
+            
+            String sql = "SELECT COUNT(*) FROM reserva r " +
+                "JOIN pago p ON r.id = p.reserva_id " +
+                "WHERE r.jugador_id = ?1 AND p.metodo_pago = ?2 AND r.fecha_reserva >= ?3 AND r.fecha_reserva <= ?4";
+                
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter(1, usuario.getNumeroDocumento());
+            query.setParameter(2, metodoPago.name());
+            query.setParameter(3, fechaInicio);
+            query.setParameter(4, fechaFin);
+            
+            Number result = (Number) query.getSingleResult();
+            return result != null ? result.longValue() : 0;
+        } catch (Exception e) {
+            log.error("Error al contar reservas del usuario {} por método de pago {} en periodo {}-{}: {}", 
+                     usuario.getNumeroDocumento(), metodoPago, fechaInicio, fechaFin, e.getMessage(), e);
+            return 0;
+        }
+    }
+
+    /**
+     * Obtiene las reservas de un usuario específico en un periodo
+     * Incluye reservas actuales y futuras dentro del periodo
+     */
+    public List<Reserva> obtenerReservasUsuarioEnPeriodo(Usuario usuario, LocalDate fechaInicio, LocalDate fechaFin) {
+        try {
+            String consulta = "SELECT r FROM Reserva r WHERE r.usuario.numeroDocumento = :usuarioId AND r.fechaReserva >= :fechaInicio AND r.fechaReserva <= :fechaFin ORDER BY r.fechaReserva DESC";
+            
+            return entityManager.createQuery(consulta, Reserva.class)
+                    .setParameter("usuarioId", usuario.getNumeroDocumento())
+                    .setParameter("fechaInicio", fechaInicio)
+                    .setParameter("fechaFin", fechaFin)
+                    .getResultList();
+        } catch (Exception e) {
+            log.error("Error al obtener reservas del usuario {} en periodo {}-{}: {}", 
+                    usuario.getNumeroDocumento(), fechaInicio, fechaFin, e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
 
     public Page<Reserva> buscarReservasActivas(LocalDate fecha, String canchaId, int pagina, int tamano) {
         try {
@@ -732,54 +833,41 @@ public class ReservaService {
         }
     }
 
+    /**
+     * Método para que un usuario cancele su propia reserva
+     */
     @Transactional
     public String eliminarReserva(Integer reservaId) {
         try {
-            Optional<Reserva> reservaOpt = reservaRepository.findById(reservaId);
-            if (!reservaOpt.isPresent()) {
-                return "Error: No se encontró la reserva";
-            }
-            
-            Reserva reserva = reservaOpt.get();
-            
-            // Verificar si la reserva es cancelable
-            if (!esReservaCancelable(reserva)) {
-                if (reserva.getEstadoReserva() == EstadoReserva.CANCELADA) {
-                    return "Error: La reserva ya está cancelada";
-                } else if (reserva.getEstadoReserva() == EstadoReserva.VENCIDA) {
-                    return "Error: No se puede cancelar una reserva vencida";
-                } else {
-                    return "Error: No se puede cancelar una reserva para una fecha pasada";
-                }
-            }
-                
             StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_eliminar_reserva");
             
             // Registrar los parámetros
             query.registerStoredProcedureParameter("p_reserva_id", Integer.class, ParameterMode.IN);
             query.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
             
-            // Establecer el valor del parámetro
+            // Establecer los valores de los parámetros
             query.setParameter("p_reserva_id", reservaId);
             
             // Ejecutar el procedimiento almacenado
             query.execute();
             
-            // Obtener el mensaje de respuesta
+            // Obtener el resultado
             String mensaje = (String) query.getOutputParameterValue("p_mensaje");
             
-            // Si la cancelación fue exitosa, notificar
-            if (mensaje.contains("exitosamente")) {
-                reserva.setEstadoReserva(EstadoReserva.CANCELADA);
-                reservaRepository.save(reserva);
+            // Si la cancelación fue exitosa, crear notificación
+            if (!mensaje.startsWith("Error")) {
+                // Primero obtenemos la reserva para guardar los datos en la notificación
+                Optional<Reserva> reservaOpt = reservaRepository.findById(reservaId);
                 
-                // Crear notificación sobre la cancelación
-                notificacionService.crearNotificacionReservaCancelada(reserva);
+                if (reservaOpt.isPresent()) {
+                    Reserva reserva = reservaOpt.get();
+                    notificacionService.crearNotificacionReservaCancelada(reserva);
+                }
             }
             
             return mensaje;
         } catch (Exception e) {
-            log.error("Error al eliminar reserva {}: {}", reservaId, e.getMessage(), e);
+            log.error("Error al eliminar la reserva: {}", e.getMessage(), e);
             return "Error al cancelar la reserva: " + e.getMessage();
         }
     }

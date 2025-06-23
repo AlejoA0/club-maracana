@@ -1,5 +1,6 @@
 package com.maracana.service.email;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import org.springframework.mail.javamail.JavaMailSender;
@@ -46,10 +47,22 @@ public class SpecificUsersEmailStrategy implements EmailStrategy {
         
         helper.setSubject(asunto);
         helper.setText(cuerpo, true); // true para contenido HTML
-        helper.setTo(destinatarios.toArray(new String[0]));
+        
+        try {
+            // Envío como copia oculta para preservar la privacidad de los destinatarios
+            helper.setFrom("clubmaracanafc@gmail.com", "Club Social y Deportivo Maracaná");
+            helper.setTo("clubmaracanafc@gmail.com"); // Establecer el remitente como destinatario principal
+            helper.setBcc(destinatarios.toArray(new String[0])); // Usar copia oculta (BCC) para los destinatarios reales
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error al configurar el remitente con nombre personalizado: {}", e.getMessage());
+            // Si falla con el nombre personalizado, intentar solo con la dirección
+            helper.setFrom("clubmaracanafc@gmail.com");
+            helper.setTo("clubmaracanafc@gmail.com");
+            helper.setBcc(destinatarios.toArray(new String[0]));
+        }
         
         mailSender.send(message);
-        log.info("Correo enviado a destinatarios específicos: {} destinatarios", destinatarios.size());
+        log.info("Correo enviado en copia oculta a destinatarios específicos: {} destinatarios", destinatarios.size());
     }
     
     @Override
