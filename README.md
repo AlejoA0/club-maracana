@@ -1,6 +1,6 @@
 # Club Maracaná 🏟️
 
-Sistema de gestión y reservas para el Club Social y Deportivo Maracaná: una plataforma web donde los jugadores reservan canchas y pagan en línea, y los administradores gestionan usuarios, canchas, reservas y reportes.
+Sistema de gestión y reservas para el Club Social y Deportivo Maracaná: una plataforma web donde los jugadores reservan canchas y pagan en línea, y los administradores gestionan usuarios, canchas, reservas y reportes. Desarrollado desde cero y en uso activo por el personal del club, reemplazando el registro manual de ingresos, reservas e historial de clientes.
 
 ## Funcionalidades
 
